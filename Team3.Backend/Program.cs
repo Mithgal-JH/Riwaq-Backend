@@ -46,15 +46,14 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // Swagger UI
-if (app.Environment.IsDevelopment())
+
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Team3 Backend API v1");
-        options.RoutePrefix = "swagger";
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Team3 Backend API v1");
+    options.RoutePrefix = "swagger";
+});
 
 app.MapControllers();
 
