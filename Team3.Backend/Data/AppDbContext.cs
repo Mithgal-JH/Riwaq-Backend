@@ -32,7 +32,6 @@ public class AppDbContext : DbContext
     public DbSet<Interest> Interests => Set<Interest>();
 
     public DbSet<UserSkill> UserSkills => Set<UserSkill>();
-    public DbSet<UserExperience> UserExperiences => Set<UserExperience>();
     public DbSet<UserInterest> UserInterests => Set<UserInterest>();
     public DbSet<LearningDirectionSkill> LearningDirectionSkills =>
         Set<LearningDirectionSkill>();
@@ -45,6 +44,12 @@ public class AppDbContext : DbContext
     public DbSet<EducationalContentLearningDirection>
         EducationalContentLearningDirections =>
         Set<EducationalContentLearningDirection>();
+
+    public DbSet<SkillVerificationRequest> SkillVerificationRequests =>
+    Set<SkillVerificationRequest>();
+
+    public DbSet<PointsTransaction> PointsTransactions =>
+        Set<PointsTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,6 +102,12 @@ public class AppDbContext : DbContext
                 .WithMany(x => x.Progresses)
                 .HasForeignKey(x => x.LearningDirectionId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.LearningDirectionId
+            }).IsUnique();
         });
 
         modelBuilder.Entity<EducationalContent>(entity =>
@@ -324,8 +335,43 @@ public class AppDbContext : DbContext
         });
 
         modelBuilder.Entity<Experience>(entity =>
+{
+    entity.HasKey(x => x.Id);
+
+    entity.HasOne(x => x.User)
+        .WithMany()
+        .HasForeignKey(x => x.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+});
+
+        modelBuilder.Entity<SkillVerificationRequest>(entity =>
         {
             entity.HasKey(x => x.Id);
+
+            entity.HasOne(x => x.RequesterUser)
+                .WithMany(x => x.RequestedSkillVerifications)
+                .HasForeignKey(x => x.RequesterUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.MentorUser)
+                .WithMany(x => x.MentoredSkillVerifications)
+                .HasForeignKey(x => x.MentorUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Skill)
+                .WithMany(x => x.SkillVerificationRequests)
+                .HasForeignKey(x => x.SkillId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PointsTransaction>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.HasOne(x => x.User)
+                .WithMany(x => x.PointsTransactions)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Interest>(entity =>
@@ -352,25 +398,6 @@ public class AppDbContext : DbContext
             entity.HasOne(x => x.Skill)
                 .WithMany(x => x.UserSkills)
                 .HasForeignKey(x => x.SkillId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<UserExperience>(entity =>
-        {
-            entity.HasKey(x => new
-            {
-                x.UserId,
-                x.ExperienceId
-            });
-
-            entity.HasOne(x => x.User)
-                .WithMany(x => x.UserExperiences)
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(x => x.Experience)
-                .WithMany(x => x.UserExperiences)
-                .HasForeignKey(x => x.ExperienceId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

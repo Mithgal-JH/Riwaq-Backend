@@ -12,6 +12,17 @@ public class User
 
     public Profile? Profile { get; set; }
 
+    public int Points { get; set; }
+
+    public ICollection<SkillVerificationRequest> RequestedSkillVerifications { get; set; } =
+        new List<SkillVerificationRequest>();
+
+    public ICollection<SkillVerificationRequest> MentoredSkillVerifications { get; set; } =
+        new List<SkillVerificationRequest>();
+
+    public ICollection<PointsTransaction> PointsTransactions { get; set; } =
+        new List<PointsTransaction>();
+
     public ICollection<Progress> Progresses { get; set; } = new List<Progress>();
 
     public ICollection<EducationalContent> EducationalContents { get; set; } =
@@ -50,9 +61,6 @@ public class User
 
     public ICollection<UserSkill> UserSkills { get; set; } =
         new List<UserSkill>();
-
-    public ICollection<UserExperience> UserExperiences { get; set; } =
-        new List<UserExperience>();
 
     public ICollection<UserInterest> UserInterests { get; set; } =
         new List<UserInterest>();
