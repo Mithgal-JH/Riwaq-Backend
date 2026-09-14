@@ -6,9 +6,11 @@ public class Conversation
 
     public Guid ConnectionId { get; set; }
 
+    public string? Subject { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTime LastActivityAt { get; set; }
 
     public Connection Connection { get; set; } = null!;
 

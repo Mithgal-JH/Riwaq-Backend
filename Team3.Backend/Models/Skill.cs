@@ -16,4 +16,7 @@ public class Skill
 
     public ICollection<EducationalContentSkill> EducationalContentSkills { get; set; } =
         new List<EducationalContentSkill>();
+
+    public ICollection<SkillVerificationRequest> SkillVerificationRequests { get; set; } =
+    new List<SkillVerificationRequest>();
 }
