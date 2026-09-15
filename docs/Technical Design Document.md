@@ -2760,17 +2760,15 @@ internal database or authentication details unnecessarily.
 
 | **Method** | **Endpoint**   | **Expected Response Data**                                                                                                                                                                                          |
 | ---------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET        | /profiles/{id} | Profile &#x20; information including id, userId, firstName, lastName, bio, university, &#x20; updatedAt, points, skills, interests, and a sessions summary &#x20; (completedSessionsCount, scheduledSessionsCount). |
-| POST       | /profiles      | The &#x20; created profile including its generated id and profile information.                                                                                                                                      |
-| PATCH      | /profiles/{id} | The &#x20; updated profile including its current information and updatedAt.                                                                                                                                         |
-| PATCH      | /profiles/me   | The &#x20; updated current Learning Direction information.                                                                                                                                                          |
-| DELETE     | /users/me      | No &#x20; response body when 204 No Content is returned.                                                                                                                                                            |
+| GET        | /profiles/{id} | Profile information including id, userId, firstName, lastName, bio, university, updatedAt, points, skills, interests, and a sessions summary (completedSessionsCount, scheduledSessionsCount). |
+| POST       | /profiles      | The created profile including its generated id and profile information.                                                                                                                                      |
+| PATCH      | /profiles/{id} | The updated profile including its current information and updatedAt.                                                                                                                                         |
+| PATCH      | /profiles/me   | The updated current Learning Direction information.                                                                                                                                                          |
+| DELETE     | /users/me      | No response body when 204 No Content is returned.                                                                                                                                                            |
 
 Example response for GET /profiles/{id}:
 
-json
-
-````json
+```json
 {
   "id": "profile-uuid",
   "userId": "user-uuid",
@@ -2787,19 +2785,21 @@ json
   },
   "updatedAt": "2026-09-14T10:00:00"
 }
+```
+
 #### Educational Content
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /educational-content | A &#x20; collection of educational content items with their main information and &#x20; relevant interaction data. |
-| GET | /educational-content/{id} | The &#x20; requested content item with its details and relevant interaction information. |
-| POST | /educational-content | The &#x20; created content including its generated id and current information. |
-| PATCH | /educational-content/{id} | The &#x20; updated content including its current information and updatedAt. |
-| DELETE | /educational-content/{id} | No &#x20; response body when 204 No Content is returned. |
-| POST/DELETE | /educational-content/{id}/likes | No &#x20; response body when 204 No Content is returned. |
-| POST/DELETE | /educational-content/{id}/saves | No &#x20; response body when 204 No Content is returned. |
-| POST/DELETE | /educational-content/{id}/reposts | No &#x20; response body when 204 No Content is returned. |
-| POST | /educational-content/{id}/shares | No &#x20; response body when 204 No Content is returned. |
+| GET | /educational-content | A collection of educational content items with their main information and relevant interaction data. |
+| GET | /educational-content/{id} | The requested content item with its details and relevant interaction information. |
+| POST | /educational-content | The created content including its generated id and current information. |
+| PATCH | /educational-content/{id} | The updated content including its current information and updatedAt. |
+| DELETE | /educational-content/{id} | No response body when 204 No Content is returned. |
+| POST/DELETE | /educational-content/{id}/likes | No response body when 204 No Content is returned. |
+| POST/DELETE | /educational-content/{id}/saves | No response body when 204 No Content is returned. |
+| POST/DELETE | /educational-content/{id}/reposts | No response body when 204 No Content is returned. |
+| POST | /educational-content/{id}/shares | No response body when 204 No Content is returned. |
 
 ---
 
@@ -2807,10 +2807,10 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /educational-content/{contentId}/comments | A &#x20; collection of comments including author information, content, &#x20; parentCommentId, and timestamps. |
-| POST | /educational-content/{contentId}/comments | The &#x20; created comment including its generated id, author, content, parentCommentId, &#x20; and createdAt. |
-| PATCH | /comments/{id} | The &#x20; updated comment including its current content and updatedAt. |
-| DELETE | /comments/{id} | No &#x20; response body when 204 No Content is returned. |
+| GET | /educational-content/{contentId}/comments | A collection of comments including author information, content, parentCommentId, and timestamps. |
+| POST | /educational-content/{contentId}/comments | The created comment including its generated id, author, content, parentCommentId, and createdAt. |
+| PATCH | /comments/{id} | The updated comment including its current content and updatedAt. |
+| DELETE | /comments/{id} | No response body when 204 No Content is returned. |
 
 ---
 
@@ -2818,10 +2818,10 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| POST | /connection-requests | The &#x20; created request including id, sender, receiver, status, and timestamps. |
-| GET | /connection-requests/received | A &#x20; collection of received requests with sender information and status. |
-| GET | /connection-requests/sent | A &#x20; collection of sent requests with receiver information and status. |
-| PATCH | /connection-requests/{id} | The &#x20; updated request including its new status and updatedAt. |
+| POST | /connection-requests | The created request including id, sender, receiver, status, and timestamps. |
+| GET | /connection-requests/received | A collection of received requests with sender information and status. |
+| GET | /connection-requests/sent | A collection of sent requests with receiver information and status. |
+| PATCH | /connection-requests/{id} | The updated request including its new status and updatedAt. |
 
 ---
 
@@ -2829,10 +2829,10 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /connections | A &#x20; collection of the current user's connections with relevant user/profile &#x20; information. |
-| GET | /connections/{id} | The &#x20; requested connection and its associated users. |
-| DELETE | /connections/{id} | No &#x20; response body when 204 No Content is returned. |
-| POST | /connections/attempts/purchase | The &#x20; updated points balance and remaining connection attempts. |
+| GET | /connections | A collection of the current user's connections with relevant user/profile information. |
+| GET | /connections/{id} | The requested connection and its associated users. |
+| DELETE | /connections/{id} | No response body when 204 No Content is returned. |
+| POST | /connections/attempts/purchase | The updated points balance and remaining connection attempts. |
 
 ---
 
@@ -2840,8 +2840,8 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /conversations | A &#x20; collection of conversations including subject, participant information, and &#x20; lastActivityAt. |
-| GET | /conversations/{id} | The &#x20; requested conversation including its subject, participants, and &#x20; lastActivityAt. |
+| GET | /conversations | A collection of conversations including subject, participant information, and lastActivityAt. |
+| GET | /conversations/{id} | The requested conversation including its subject, participants, and lastActivityAt. |
 
 ---
 
@@ -2849,9 +2849,9 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /conversations/{conversationId}/messages | A &#x20; collection of messages including sender information, content, and timestamps. |
-| POST | /conversations/{conversationId}/messages | The &#x20; created message including id, sender, content, and timestamps. |
-| PATCH | /messages/{id} | The &#x20; updated message including its current content and updatedAt. |
+| GET | /conversations/{conversationId}/messages | A collection of messages including sender information, content, and timestamps. |
+| POST | /conversations/{conversationId}/messages | The created message including id, sender, content, and timestamps. |
+| PATCH | /messages/{id} | The updated message including its current content and updatedAt. |
 
 ---
 
@@ -2859,10 +2859,10 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /learning-sessions | A &#x20; collection of the user's learning sessions with session and connection &#x20; information. |
-| GET | /learning-sessions/{id} | The &#x20; requested session including its details, status, connection, and meeting &#x20; information. |
-| POST | /learning-sessions | The &#x20; created session including its generated id, details, status, and timestamps. |
-| PATCH | /learning-sessions/{id} | The &#x20; updated session including its current details, status, and updatedAt. |
+| GET | /learning-sessions | A collection of the user's learning sessions with session and connection information. |
+| GET | /learning-sessions/{id} | The requested session including its details, status, connection, and meeting information. |
+| POST | /learning-sessions | The created session including its generated id, details, status, and timestamps. |
+| PATCH | /learning-sessions/{id} | The updated session including its current details, status, and updatedAt. |
 
 ---
 
@@ -2870,8 +2870,8 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| POST | /learning-sessions/{sessionId}/ratings | The &#x20; submitted rating including score, review, rater, rated user, and createdAt. |
-| GET | /profiles/{userId}/ratings | A &#x20; collection of ratings received by the user, including score, review, rater &#x20; information, and session reference. |
+| POST | /learning-sessions/{sessionId}/ratings | The submitted rating including score, review, rater, rated user, and createdAt. |
+| GET | /profiles/{userId}/ratings | A collection of ratings received by the user, including score, review, rater information, and session reference. |
 
 ---
 
@@ -2879,10 +2879,10 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| POST | /skill-verification-requests | The &#x20; created request including id, requester, mentor, skill, status, and &#x20; timestamps. |
-| GET | /skill-verification-requests/sent | A &#x20; collection of sent requests with mentor and skill information, and status. |
-| GET | /skill-verification-requests/received | A &#x20; collection of received requests with requester and skill information, and &#x20; status. |
-| PATCH | /skill-verification-requests/{id} | The &#x20; updated request including its status, score (if accepted), optional note, and &#x20; updatedAt. |
+| POST | /skill-verification-requests | The created request including id, requester, mentor, skill, status, and timestamps. |
+| GET | /skill-verification-requests/sent | A collection of sent requests with mentor and skill information, and status. |
+| GET | /skill-verification-requests/received | A collection of received requests with requester and skill information, and status. |
+| PATCH | /skill-verification-requests/{id} | The updated request including its status, score (if accepted), optional note, and updatedAt. |
 
 ---
 
@@ -2890,15 +2890,18 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /notifications | A &#x20; collection of notifications including type, message, read status, and &#x20; timestamp. |
-| PATCH | /notifications/{id} | The &#x20; updated notification including its current read status. |
-| DELETE | /notifications/{id} | No &#x20; response body when 204 No Content is returned. |
+| GET | /notifications | A collection of notifications including type, message, read status, and timestamp. |
+| PATCH | /notifications/{id} | The updated notification including its current read status. |
+| DELETE | /notifications/{id} | No response body when 204 No Content is returned. |
+
+---
+
 #### Learning Directions
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /learning-directions | A &#x20; collection of available learning directions including id, name, and description. |
-| GET | /learning-directions/{id} | The &#x20; requested learning direction including its details. |
+| GET | /learning-directions | A collection of available learning directions including id, name, and description. |
+| GET | /learning-directions/{id} | The requested learning direction including its details. |
 
 ---
 
@@ -2906,10 +2909,10 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /progress | A &#x20; collection of the current user's progress records including learning &#x20; direction, level, and dates. |
-| GET | /progress/{id} | The &#x20; requested progress record including its details and associated learning &#x20; direction. |
-| POST | /progress | The &#x20; created progress record including id, learning direction, level, and &#x20; timestamps. |
-| PATCH | /progress/{id} | The &#x20; updated progress record including its current level and updatedAt. |
+| GET | /progress | A collection of the current user's progress records including learning direction, level, and dates. |
+| GET | /progress/{id} | The requested progress record including its details and associated learning direction. |
+| POST | /progress | The created progress record including id, learning direction, level, and timestamps. |
+| PATCH | /progress/{id} | The updated progress record including its current level and updatedAt. |
 
 ---
 
@@ -2917,11 +2920,11 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /skills | A &#x20; collection of standardized skills including id, name, and description. |
-| GET | /skills/{id} | The &#x20; requested skill including its details. |
-| GET | /profiles/me/skills | A &#x20; collection of skills associated with the current user's profile. |
-| PUT | /profiles/me/skills/{skillId} | No &#x20; response body when 204 No Content is returned. |
-| DELETE | /profiles/me/skills/{skillId} | No &#x20; response body when 204 No Content is returned. |
+| GET | /skills | A collection of standardized skills including id, name, and description. |
+| GET | /skills/{id} | The requested skill including its details. |
+| GET | /profiles/me/skills | A collection of skills associated with the current user's profile. |
+| PUT | /profiles/me/skills/{skillId} | No response body when 204 No Content is returned. |
+| DELETE | /profiles/me/skills/{skillId} | No response body when 204 No Content is returned. |
 
 ---
 
@@ -2929,11 +2932,11 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /experiences | A &#x20; collection of the current user's experiences. |
-| GET | /experiences/{id} | The &#x20; requested experience including its details. |
-| POST | /experiences | The &#x20; created experience including its generated id and details. |
-| PATCH | /experiences/{id} | The &#x20; updated experience including its current information. |
-| DELETE | /experiences/{id} | No &#x20; response body when 204 No Content is returned. |
+| GET | /experiences | A collection of the current user's experiences. |
+| GET | /experiences/{id} | The requested experience including its details. |
+| POST | /experiences | The created experience including its generated id and details. |
+| PATCH | /experiences/{id} | The updated experience including its current information. |
+| DELETE | /experiences/{id} | No response body when 204 No Content is returned. |
 
 ---
 
@@ -2941,11 +2944,11 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /interests | A &#x20; collection of standardized interests including id, name, and description. |
-| GET | /interests/{id} | The &#x20; requested interest including its details. |
-| GET | /profiles/me/interests | A &#x20; collection of interests associated with the current user's profile. |
-| PUT | /profiles/me/interests/{interestId} | No &#x20; response body when 204 No Content is returned. |
-| DELETE | /profiles/me/interests/{interestId} | No &#x20; response body when 204 No Content is returned. |
+| GET | /interests | A collection of standardized interests including id, name, and description. |
+| GET | /interests/{id} | The requested interest including its details. |
+| GET | /profiles/me/interests | A collection of interests associated with the current user's profile. |
+| PUT | /profiles/me/interests/{interestId} | No response body when 204 No Content is returned. |
+| DELETE | /profiles/me/interests/{interestId} | No response body when 204 No Content is returned. |
 
 ---
 
@@ -2953,7 +2956,7 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| GET | /points/me | The &#x20; user's current points balance and a collection of transaction records &#x20; (amount, reason, createdAt). |
+| GET | /points/me | The user's current points balance and a collection of transaction records (amount, reason, createdAt). |
 
 ---
 
@@ -2961,18 +2964,19 @@ json
 
 | **Method** | **Endpoint** | **Expected Response Data** |
 | --- | --- | --- |
-| DELETE | /users/me | No &#x20; response body when 204 No Content is returned. |
-| GET | /recommendations | A &#x20; collection of recommended users/profiles with relevant matching information. |
-| GET | /search?query={query}&type={type} | Search &#x20; results based on the requested query, optionally filtered by type. |
-| GET | /leaderboard | A &#x20; ranked collection of users including name, points, and current Learning Direction. |
+| DELETE | /users/me | No response body when 204 No Content is returned. |
+| GET | /recommendations | A collection of recommended users/profiles with relevant matching information. |
+| GET | /search?query={query}&type={type} | Search results based on the requested query, optionally filtered by type. |
+| GET | /leaderboard | A ranked collection of users including name, points, and current Learning Direction. |
+
 **Response Design Notes**
 
-- Responses use DTOs and contain only data required by      the client.
-- Authentication credentials and internal Firebase      authentication details are not exposed.
-- Collection endpoints return collections, while item      endpoints return a single resource.
-- Create and update operations return the resulting      resource when appropriate.
-- Successful DELETE operations and bodyless interaction      operations return 204 No Content and therefore do not include a response      body.
-- Interaction results such as counts or current      interaction state may be retrieved through relevant GET endpoints or      included in content responses when required by the Frontend.
+- Responses use DTOs and contain only data required by the client.
+- Authentication credentials and internal Firebase authentication details are not exposed.
+- Collection endpoints return collections, while item endpoints return a single resource.
+- Create and update operations return the resulting resource when appropriate.
+- Successful DELETE operations and bodyless interaction operations return 204 No Content and therefore do not include a response body.
+- Interaction results such as counts or current interaction state may be retrieved through relevant GET endpoints or included in content responses when required by the Frontend.
 
 ---
 
@@ -2983,26 +2987,26 @@ each request.
 
 | **Status Code** | **Meaning** | **Usage** |
 | --- | --- | --- |
-| 200 &#x20; OK | Request &#x20; completed successfully. | Successful &#x20; GET requests and successful PATCH operations that return the updated &#x20; resource. |
-| 201 &#x20; Created | A &#x20; new resource was successfully created. | Successful &#x20; POST requests that create a resource. |
-| 204 &#x20; No Content | Request &#x20; completed successfully with no response body. | Successful &#x20; DELETE requests, PUT relationship operations, and bodyless interaction/action &#x20; operations. |
-| 400 &#x20; Bad Request | The &#x20; request is invalid. | Invalid &#x20; request format or invalid input data. |
-| 401 &#x20; Unauthorized | Authentication &#x20; is required or invalid. | Missing, &#x20; expired, or invalid Firebase authentication token. |
-| 403 &#x20; Forbidden | The &#x20; user is authenticated but not allowed to perform the operation. | Accessing &#x20; or modifying resources that the authenticated user does not have permission &#x20; to access. |
-| 404 &#x20; Not Found | The &#x20; requested resource does not exist. | Invalid &#x20; resource IDs or unavailable resources. |
-| 409 &#x20; Conflict | The &#x20; request conflicts with the current state of the resource. | Duplicate &#x20; or conflicting operations such as an existing connection or relationship. |
-| 422 &#x20; Unprocessable Content | The &#x20; request is syntactically valid but violates applicable domain validation &#x20; rules. | Domain-specific &#x20; validation failures when applicable. |
+| 200 OK | Request completed successfully. | Successful GET requests and successful PATCH operations that return the updated resource. |
+| 201 Created | A new resource was successfully created. | Successful POST requests that create a resource. |
+| 204 No Content | Request completed successfully with no response body. | Successful DELETE requests, PUT relationship operations, and bodyless interaction/action operations. |
+| 400 Bad Request | The request is invalid. | Invalid request format or invalid input data. |
+| 401 Unauthorized | Authentication is required or invalid. | Missing, expired, or invalid Firebase authentication token. |
+| 403 Forbidden | The user is authenticated but not allowed to perform the operation. | Accessing or modifying resources that the authenticated user does not have permission to access. |
+| 404 Not Found | The requested resource does not exist. | Invalid resource IDs or unavailable resources. |
+| 409 Conflict | The request conflicts with the current state of the resource. | Duplicate or conflicting operations such as an existing connection or relationship. |
+| 422 Unprocessable Content | The request is syntactically valid but violates applicable domain validation rules. | Domain-specific validation failures when applicable. |
 
 **Endpoint Status Code Summary**
 
 | **Resource / Operation** | **Success Status** |
 | --- | --- |
-| GET &#x20; resource / collection | 200 &#x20; OK |
-| POST &#x20; creating a resource | 201 &#x20; Created |
-| PATCH &#x20; updating a resource | 200 &#x20; OK |
-| DELETE &#x20; resource | 204 &#x20; No Content |
-| PUT &#x20; relationship operation | 204 &#x20; No Content |
-| POST &#x20; interaction/action without creating a new resource | 204 &#x20; No Content |
+| GET resource / collection | 200 OK |
+| POST creating a resource | 201 Created |
+| PATCH updating a resource | 200 OK |
+| DELETE resource | 204 No Content |
+| PUT relationship operation | 204 No Content |
+| POST interaction/action without creating a new resource | 204 No Content |
 
 Error responses may additionally return 400, 401, 403, 404, 409, or 422
 depending on the reason for failure. The exact error response format will be
@@ -3014,34 +3018,34 @@ standardized during implementation.
 
 The platform uses Firebase Authentication to authenticate users. The Backend
 verifies the Firebase ID token included with authenticated API requests and
-uses the associated firebase\_uid to identify the local user.
+uses the associated firebase_uid to identify the local user.
 
 #### Authentication Rules
 
 | **API Operation** | **Authentication** |
 | --- | --- |
-| View &#x20; public profiles | Not &#x20; required |
-| Public &#x20; retrieval of educational content | Not &#x20; required |
-| Public &#x20; retrieval of learning directions, skills, and interests | Not &#x20; required |
-| Create &#x20; or modify a profile | Required |
-| Create, &#x20; modify, or delete educational content | Required |
-| Like, &#x20; save, repost, or share content | Required |
-| Create, &#x20; modify, or delete comments | Required |
-| Send &#x20; or manage connection requests | Required |
-| Purchase &#x20; a connection attempt using points | Required |
-| View &#x20; or manage connections | Required |
-| Access &#x20; conversations and messages | Required |
-| Create &#x20; or manage learning sessions | Required |
-| Submit &#x20; or view ratings | Required |
-| Send, &#x20; view, or respond to skill verification requests | Required |
-| Access &#x20; notifications | Required |
-| Access &#x20; or modify progress | Required |
-| Manage &#x20; experiences | Required |
-| Manage &#x20; personal skills and interests | Required |
-| Retrieve &#x20; personalized recommendations | Required |
-| View &#x20; the leaderboard | Required |
-| View &#x20; own points balance and transaction history | Required |
-| Delete &#x20; the user account | Required |
+| View public profiles | Not required |
+| Public retrieval of educational content | Not required |
+| Public retrieval of learning directions, skills, and interests | Not required |
+| Create or modify a profile | Required |
+| Create, modify, or delete educational content | Required |
+| Like, save, repost, or share content | Required |
+| Create, modify, or delete comments | Required |
+| Send or manage connection requests | Required |
+| Purchase a connection attempt using points | Required |
+| View or manage connections | Required |
+| Access conversations and messages | Required |
+| Create or manage learning sessions | Required |
+| Submit or view ratings | Required |
+| Send, view, or respond to skill verification requests | Required |
+| Access notifications | Required |
+| Access or modify progress | Required |
+| Manage experiences | Required |
+| Manage personal skills and interests | Required |
+| Retrieve personalized recommendations | Required |
+| View the leaderboard | Required |
+| View own points balance and transaction history | Required |
+| Delete the user account | Required |
 
 #### Authentication Flow
 
@@ -3061,6 +3065,7 @@ Identify Local User Using firebase_uid
 Authorization & Business Rules
   ↓
 Process Request
+```
 
 #### Authorization
 
@@ -3069,20 +3074,20 @@ whether the authenticated user is allowed to perform the requested operation.
 
 The Backend enforces authorization and ownership rules. For example:
 
-- Users can modify only their own profiles, educational      content, comments, experiences, and personal skill/interest relationships.
-- Only connected users can access conversations and      exchange messages.
-- Only eligible participants can create or manage      learning sessions.
-- Only eligible participants can submit ratings after a      qualifying learning session.
-- A Skill Verification Request can only be created      between a requester and a mentor who share at least one existing Learning      Session.
-- A newly registered user must complete Onboarding      (selecting a Learning Direction, Skills, and Interests) before accessing the      Home feed, Recommendations, or other core platform features.
-- Users cannot access or modify private data belonging      to other users without permission.
+- Users can modify only their own profiles, educational content, comments, experiences, and personal skill/interest relationships.
+- Only connected users can access conversations and exchange messages.
+- Only eligible participants can create or manage learning sessions.
+- Only eligible participants can submit ratings after a qualifying learning session.
+- A Skill Verification Request can only be created between a requester and a mentor who share at least one existing Learning Session.
+- A newly registered user must complete Onboarding (selecting a Learning Direction, Skills, and Interests) before accessing the Home feed, Recommendations, or other core platform features.
+- Users cannot access or modify private data belonging to other users without permission.
 
 #### Firebase Integration
 
 Firebase Authentication manages user authentication credentials. The
 application does not store user passwords locally.
 
-The local User entity stores the firebase\_uid required to associate the
+The local User entity stores the firebase_uid required to associate the
 authenticated Firebase account with the application's user data.
 
 Firebase Authentication is an external authentication service and is
@@ -3102,8 +3107,8 @@ deletion rules.
 
 ### 11.9 References
 
-1. Microsoft Learn. RESTful web API design best      practices. Used as a reference for resource-based API design, URI naming,      HTTP methods, and RESTful API conventions.
-2. Microsoft Learn. Microsoft Graph API design. Used as a      reference for designing API resources around client requirements and      domain concepts rather than directly exposing the database structure.
-3. IETF. RFC 9110: HTTP Semantics. Used as a reference      for the semantics of HTTP methods and standard HTTP response status codes.
-4. Firebase Documentation. Firebase Authentication. Used      as a reference for Firebase Authentication, ID tokens, and backend      authentication verification.
+1. Microsoft Learn. RESTful web API design best practices. Used as a reference for resource-based API design, URI naming, HTTP methods, and RESTful API conventions.
+2. Microsoft Learn. Microsoft Graph API design. Used as a reference for designing API resources around client requirements and domain concepts rather than directly exposing the database structure.
+3. IETF. RFC 9110: HTTP Semantics. Used as a reference for the semantics of HTTP methods and standard HTTP response status codes.
+4. Firebase Documentation. Firebase Authentication. Used as a reference for Firebase Authentication, ID tokens, and backend authentication verification.
 ````
