@@ -1,16 +1,18 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Team3.Backend.Models;
 
 namespace Team3.Backend.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext
+    : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
     }
 
-    public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<LearningDirection> LearningDirections => Set<LearningDirection>();
     public DbSet<Progress> Progresses => Set<Progress>();
@@ -59,7 +61,13 @@ public class AppDbContext : DbContext
         {
             entity.HasKey(x => x.Id);
 
+            entity.Property(x => x.FirebaseUid)
+                .IsRequired();
+
             entity.HasIndex(x => x.FirebaseUid)
+                .IsUnique();
+
+            entity.HasIndex(x => x.Email)
                 .IsUnique();
 
             // Learning Direction is optional for a User.
