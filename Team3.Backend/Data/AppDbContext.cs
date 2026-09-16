@@ -62,9 +62,12 @@ public class AppDbContext : DbContext
             entity.HasIndex(x => x.FirebaseUid)
                 .IsUnique();
 
+            // Learning Direction is optional for a User.
+            // A user can be created without selecting a learning direction.
             entity.HasOne(x => x.LearningDirection)
                 .WithMany(x => x.Users)
                 .HasForeignKey(x => x.LearningDirectionId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
