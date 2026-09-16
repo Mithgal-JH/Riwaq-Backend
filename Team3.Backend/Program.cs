@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore;
-using Team3.Backend.Data;
 using Npgsql;
+using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Database configuration
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Initialize Firebase Admin SDK.
 FirebaseAuthenticationService.Initialize();
@@ -33,10 +34,8 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-
-// Register all application services through Extensions.
+// Register application services and Identity.
 builder.Services.AddApplicationServices();
-
 
 builder.Services.AddControllers();
 
@@ -45,23 +44,29 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
-    {
-        Title = "Team3 Backend API",
-        Version = "v1",
-        Description = "Backend API for BinX Team 3"
-    });
+    options.SwaggerDoc(
+        "v1",
+        new Microsoft.OpenApi.OpenApiInfo
+        {
+            Title = "Team3 Backend API",
+            Version = "v1",
+            Description = "Backend API for BinX Team 3"
+        }
+    );
 });
 
 var app = builder.Build();
 
 // Swagger UI
-
 app.UseSwagger();
 
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Team3 Backend API v1");
+    options.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "Team3 Backend API v1"
+    );
+
     options.RoutePrefix = "swagger";
 });
 
