@@ -1,11 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Team3.Backend.Data;
 using Npgsql;
+using Team3.Backend.Features.Authentication;
+using Team3.Backend.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Database configuration
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Initialize Firebase Admin SDK.
+FirebaseAuthenticationService.Initialize();
 
 var databaseUrl = builder.Configuration["DATABASE_URL"];
 
@@ -27,6 +32,11 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+
+// Register all application services through Extensions.
+builder.Services.AddApplicationServices();
+
 
 builder.Services.AddControllers();
 
