@@ -6,9 +6,11 @@ public class User
 
     public string FirebaseUid { get; set; } = string.Empty;
 
-    public Guid LearningDirectionId { get; set; }
+    // Learning Direction is optional when the user is created.
+    // The user can select it later from the profile settings.
+    public Guid? LearningDirectionId { get; set; }
 
-    public LearningDirection LearningDirection { get; set; } = null!;
+    public LearningDirection? LearningDirection { get; set; }
 
     public Profile? Profile { get; set; }
 
