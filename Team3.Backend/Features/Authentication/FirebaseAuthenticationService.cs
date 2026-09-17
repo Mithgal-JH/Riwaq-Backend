@@ -59,12 +59,13 @@ public class FirebaseAuthenticationService
         });
     }
 
-    public async Task<User> GetOrCreateUserAsync(string firebaseToken)
+    public async Task<FirebaseAuthUserResult> GetOrCreateUserAsync(
+        string firebaseToken)
     {
         if (string.IsNullOrWhiteSpace(firebaseToken))
         {
             throw new ArgumentException(
-                "Firebase token is required.",
+                "Firebase ID token is required.",
                 nameof(firebaseToken)
             );
         }
@@ -95,14 +96,22 @@ public class FirebaseAuthenticationService
 
         if (existingUser is not null)
         {
-            return existingUser;
+            return new FirebaseAuthUserResult
+            {
+                User = existingUser,
+                IsNewUser = false
+            };
         }
 
         existingUser = await _userManager.FindByEmailAsync(firebaseEmail);
 
         if (existingUser is not null)
         {
-            return existingUser;
+            return new FirebaseAuthUserResult
+            {
+                User = existingUser,
+                IsNewUser = false
+            };
         }
 
         var newUser = new User
@@ -136,6 +145,10 @@ public class FirebaseAuthenticationService
             )
         );
 
-        return newUser;
+        return new FirebaseAuthUserResult
+        {
+            User = newUser,
+            IsNewUser = true
+        };
     }
 }
