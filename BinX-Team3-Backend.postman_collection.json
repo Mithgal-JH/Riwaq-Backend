@@ -569,6 +569,186 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Interests",
+      "item": [
+        {
+          "name": "List Interests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/interests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "interests"]
+            },
+            "description": "Returns all existing Interests ordered by name."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Interest",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/interests/{{interestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "interests", "{{interestId}}"]
+            },
+            "description": "Returns one existing Interest by GUID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or not found', function () {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List My Interests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/interests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "interests"]
+            },
+            "description": "Returns Interests associated with the current user's profile."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Interest to My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/interests/{{interestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "interests", "{{interestId}}"]
+            },
+            "description": "Associates an existing Interest with the current user's profile. No request body is accepted."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected validation result', function () {",
+                  "    pm.expect([200, 400, 404, 409]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Remove Interest from My Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/interests/{{interestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "interests", "{{interestId}}"]
+            },
+            "description": "Removes an Interest association from the current user's profile."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is no content or expected not found', function () {",
+                  "    pm.expect([204, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
