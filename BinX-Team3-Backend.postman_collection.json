@@ -45,6 +45,11 @@
       "key": "requestId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "experienceId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -732,6 +737,225 @@
               "path": ["api", "profiles", "me", "interests", "{{interestId}}"]
             },
             "description": "Removes an Interest association from the current user's profile."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is no content or expected not found', function () {",
+                  "    pm.expect([204, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Experiences",
+      "item": [
+        {
+          "name": "List My Experiences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/experiences",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "experiences"]
+            },
+            "description": "Returns Experiences owned by the current user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Experience",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Backend Developer\",\n  \"description\": \"Built APIs and database integrations.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/experiences",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "experiences"]
+            },
+            "description": "Creates an Experience for the current user. UserId is assigned from X-Firebase-Uid and is not accepted in the body."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is created or expected validation result', function () {",
+                  "    pm.expect([201, 400, 404]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.collectionVariables.set('experienceId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Experience",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "experiences", "{{experienceId}}"]
+            },
+            "description": "Returns an Experience only when it belongs to the current user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update My Experience",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Backend Developer\",\n  \"description\": \"Updated experience description.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "experiences", "{{experienceId}}"]
+            },
+            "description": "Updates an Experience only when it belongs to the current user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete My Experience",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "me", "experiences", "{{experienceId}}"]
+            },
+            "description": "Deletes an Experience only when it belongs to the current user."
           },
           "response": [],
           "event": [
