@@ -12,4 +12,8 @@ public interface IUsersService
         string firebaseUid,
         UpdateProfileRequest request
     );
+
+    Task<PublicUserProfileResponse?> GetPublicProfileAsync(
+        Guid id
+    );
 }
