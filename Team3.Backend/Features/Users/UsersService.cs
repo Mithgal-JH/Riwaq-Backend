@@ -69,6 +69,36 @@ public class UsersService : IUsersService
         return MapToUserProfileResponse(user);
     }
 
+    public async Task<UserProfileResponse> SelectLearningDirectionAsync(
+        string firebaseUid,
+        SelectLearningDirectionRequest request)
+    {
+        var user = await _usersRepository
+            .GetByFirebaseUidWithProfileAsync(firebaseUid);
+
+        if (user is null)
+        {
+            throw new KeyNotFoundException("User not found.");
+        }
+
+        if (request.SkillId == Guid.Empty)
+        {
+            throw new ArgumentException("skillId must be a valid Guid.");
+        }
+
+        var skill = await _usersRepository.GetSkillByIdAsync(request.SkillId);
+
+        if (skill is null)
+        {
+            throw new KeyNotFoundException("Skill not found.");
+        }
+
+        user.LearningDirectionId = skill.Id;
+        await _usersRepository.SaveChangesAsync();
+
+        return MapToUserProfileResponse(user);
+    }
+
     public async Task<PublicUserProfileResponse?> GetPublicProfileAsync(
         Guid id)
     {
@@ -84,7 +114,7 @@ public class UsersService : IUsersService
             UserId = user.Id,
             Points = user.Points,
             LearningDirectionId = user.LearningDirectionId,
-            LearningDirectionName = user.LearningDirection?.Name,
+            LearningDirectionName = user.SelectedSkill?.Name,
             FirstName = user.Profile?.FirstName,
             LastName = user.Profile?.LastName,
             Bio = user.Profile?.Bio,
