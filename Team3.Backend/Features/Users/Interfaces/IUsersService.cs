@@ -13,6 +13,11 @@ public interface IUsersService
         UpdateProfileRequest request
     );
 
+    Task<UserProfileResponse> SelectLearningDirectionAsync(
+        string firebaseUid,
+        SelectLearningDirectionRequest request
+    );
+
     Task<PublicUserProfileResponse?> GetPublicProfileAsync(
         Guid id
     );

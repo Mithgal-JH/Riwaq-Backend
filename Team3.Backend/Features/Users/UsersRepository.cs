@@ -26,8 +26,15 @@ public class UsersRepository : IUsersRepository
     {
         return await _context.Users
             .Include(x => x.Profile)
-            .Include(x => x.LearningDirection)
+            .Include(x => x.SelectedSkill)
             .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<Skill?> GetSkillByIdAsync(Guid skillId)
+    {
+        return await _context.Skills
+            .AsNoTracking()
+            .FirstOrDefaultAsync(skill => skill.Id == skillId);
     }
 
     public void AddProfile(Profile profile)

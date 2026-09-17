@@ -9,8 +9,8 @@ public class User : IdentityUser<Guid>
     public Guid? LearningDirectionId { get; set; }
 
     // Learning Direction is optional when the user is created.
-    // The user can select it later from the profile settings.
-    public LearningDirection? LearningDirection { get; set; }
+    // The user can select an existing Skill later from the profile settings.
+    public Skill? SelectedSkill { get; set; }
 
     public Profile? Profile { get; set; }
 

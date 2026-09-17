@@ -72,8 +72,8 @@ public class AppDbContext
 
             // Learning Direction is optional for a User.
             // A user can be created without selecting a learning direction.
-            entity.HasOne(x => x.LearningDirection)
-                .WithMany(x => x.Users)
+            entity.HasOne(x => x.SelectedSkill)
+                .WithMany()
                 .HasForeignKey(x => x.LearningDirectionId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -98,6 +98,8 @@ public class AppDbContext
 
             entity.HasIndex(x => x.Name)
                 .IsUnique();
+
+            entity.Ignore(x => x.Users);
         });
 
         modelBuilder.Entity<Progress>(entity =>

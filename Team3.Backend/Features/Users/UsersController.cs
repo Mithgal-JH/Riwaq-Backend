@@ -72,6 +72,44 @@ public class UsersController : ControllerBase
         }
     }
 
+    [HttpPut("me/learning-direction")]
+    public async Task<ActionResult<UserProfileResponse>>
+        SelectLearningDirection(
+            [FromBody] SelectLearningDirectionRequest request)
+    {
+        var firebaseUid = GetFirebaseUidFromRequest();
+
+        if (firebaseUid is null)
+        {
+            return BadRequest(new
+            {
+                message = "X-Firebase-Uid header is required."
+            });
+        }
+
+        try
+        {
+            var response = await _usersService
+                .SelectLearningDirectionAsync(firebaseUid, request);
+
+            return Ok(response);
+        }
+        catch (ArgumentException exception)
+        {
+            return BadRequest(new
+            {
+                message = exception.Message
+            });
+        }
+        catch (KeyNotFoundException exception)
+        {
+            return NotFound(new
+            {
+                message = exception.Message
+            });
+        }
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<PublicUserProfileResponse>> GetPublicProfile(
         Guid id)
