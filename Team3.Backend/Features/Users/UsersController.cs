@@ -18,9 +18,9 @@ public class UsersController : ControllerBase
     [HttpGet("me")]
     public async Task<ActionResult<UserProfileResponse>> GetMyProfile()
     {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
+        var firebaseUid = GetFirebaseUidFromRequest();
 
-        if (string.IsNullOrWhiteSpace(firebaseUid))
+        if (firebaseUid is null)
         {
             return BadRequest(new
             {
@@ -42,13 +42,13 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPut("me/profile")]
+    [HttpPut("me")]
     public async Task<ActionResult<UserProfileResponse>> UpdateMyProfile(
         [FromBody] UpdateProfileRequest request)
     {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
+        var firebaseUid = GetFirebaseUidFromRequest();
 
-        if (string.IsNullOrWhiteSpace(firebaseUid))
+        if (firebaseUid is null)
         {
             return BadRequest(new
             {
@@ -70,5 +70,31 @@ public class UsersController : ControllerBase
                 message = exception.Message
             });
         }
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<PublicUserProfileResponse>> GetPublicProfile(
+        Guid id)
+    {
+        var response = await _usersService.GetPublicProfileAsync(id);
+
+        if (response is null)
+        {
+            return NotFound(new
+            {
+                message = "User not found."
+            });
+        }
+
+        return Ok(response);
+    }
+
+    private string? GetFirebaseUidFromRequest()
+    {
+        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
+
+        return string.IsNullOrWhiteSpace(firebaseUid)
+            ? null
+            : firebaseUid;
     }
 }
