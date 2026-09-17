@@ -50,6 +50,11 @@
       "key": "experienceId",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "progressId",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -868,7 +873,13 @@
             "url": {
               "raw": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "profiles", "me", "experiences", "{{experienceId}}"]
+              "path": [
+                "api",
+                "profiles",
+                "me",
+                "experiences",
+                "{{experienceId}}"
+              ]
             },
             "description": "Returns an Experience only when it belongs to the current user."
           },
@@ -917,7 +928,13 @@
             "url": {
               "raw": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "profiles", "me", "experiences", "{{experienceId}}"]
+              "path": [
+                "api",
+                "profiles",
+                "me",
+                "experiences",
+                "{{experienceId}}"
+              ]
             },
             "description": "Updates an Experience only when it belongs to the current user."
           },
@@ -953,9 +970,234 @@
             "url": {
               "raw": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "profiles", "me", "experiences", "{{experienceId}}"]
+              "path": [
+                "api",
+                "profiles",
+                "me",
+                "experiences",
+                "{{experienceId}}"
+              ]
             },
             "description": "Deletes an Experience only when it belongs to the current user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is no content or expected not found', function () {",
+                  "    pm.expect([204, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "item": [
+        {
+          "name": "List My Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me", "progress"]
+            },
+            "description": "Returns Progress records owned by the current user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.expect(pm.response.json()).to.be.an('array');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"learningDirectionId\": \"{{learningDirectionId}}\",\n  \"level\": \"Beginner\",\n  \"startedAt\": \"2026-09-17T00:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me", "progress"]
+            },
+            "description": "Creates Progress for an existing Learning Direction. UserId, Id, and UpdatedAt are assigned by the server."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is created or expected validation result', function () {",
+                  "    pm.expect([201, 400, 404, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    var body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('id');",
+                  "    pm.collectionVariables.set('progressId', body.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me/progress/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me", "progress", "{{progressId}}"]
+            },
+            "description": "Returns one Progress record only when it belongs to the current user."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update My Progress",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"Intermediate\",\n  \"startedAt\": \"2026-09-17T00:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me/progress/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me", "progress", "{{progressId}}"]
+            },
+            "description": "Updates Level and StartedAt while preserving ownership and LearningDirectionId."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is successful or expected client error', function () {",
+                  "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete My Progress",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Firebase-Uid",
+                "value": "{{firebaseUid}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me/progress/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users", "me", "progress", "{{progressId}}"]
+            },
+            "description": "Deletes Progress only when it belongs to the current user."
           },
           "response": [],
           "event": [
