@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Features.Authentication.Interfaces;
+using Team3.Backend.Features.Skills;
+using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
 using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
@@ -28,6 +30,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUsersRepository, UsersRepository>();
 
         services.AddScoped<IUsersService, UsersService>();
+
+        services.AddScoped<ISkillsRepository, SkillsRepository>();
+
+        services.AddScoped<ISkillsService, SkillsService>();
 
         return services;
     }
