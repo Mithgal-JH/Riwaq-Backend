@@ -35,11 +35,18 @@ public class AuthenticationController : ControllerBase
                 message = exception.Message
             });
         }
+        catch (InvalidOperationException exception)
+        {
+            return BadRequest(new
+            {
+                message = exception.Message
+            });
+        }
         catch (FirebaseAuthException)
         {
             return Unauthorized(new
             {
-                message = "Invalid Firebase ID token."
+                message = "Invalid or expired Firebase ID token."
             });
         }
     }

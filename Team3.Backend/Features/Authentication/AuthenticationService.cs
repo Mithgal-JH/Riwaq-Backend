@@ -1,7 +1,3 @@
-using FirebaseAdmin.Auth;
-using Microsoft.EntityFrameworkCore;
-using Team3.Backend.Data;
-using Team3.Backend.Models;
 using Team3.Backend.Features.Authentication.Dtos;
 using Team3.Backend.Features.Authentication.Interfaces;
 
@@ -9,11 +5,12 @@ namespace Team3.Backend.Features.Authentication;
 
 public class AuthenticationService : IAuthenticationService
 {
-    private readonly AppDbContext _context;
+    private readonly FirebaseAuthenticationService _firebaseAuthenticationService;
 
-    public AuthenticationService(AppDbContext context)
+    public AuthenticationService(
+        FirebaseAuthenticationService firebaseAuthenticationService)
     {
-        _context = context;
+        _firebaseAuthenticationService = firebaseAuthenticationService;
     }
 
     public async Task<AuthResponse> LoginWithFirebaseAsync(
@@ -24,31 +21,10 @@ public class AuthenticationService : IAuthenticationService
             throw new ArgumentException("Firebase ID token is required.");
         }
 
-        var decodedToken = await FirebaseAuth.DefaultInstance
-            .VerifyIdTokenAsync(request.IdToken);
+        var authResult = await _firebaseAuthenticationService
+            .GetOrCreateUserAsync(request.IdToken);
 
-        var firebaseUid = decodedToken.Uid;
-
-        var user = await _context.Users
-            .FirstOrDefaultAsync(x => x.FirebaseUid == firebaseUid);
-
-        var isNewUser = false;
-
-        if (user is null)
-        {
-            user = new User
-            {
-                Id = Guid.NewGuid(),
-                FirebaseUid = firebaseUid,
-                Points = 0,
-                LearningDirectionId = null
-            };
-
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
-            isNewUser = true;
-        }
+        var user = authResult.User;
 
         return new AuthResponse
         {
@@ -56,7 +32,7 @@ public class AuthenticationService : IAuthenticationService
             FirebaseUid = user.FirebaseUid,
             Points = user.Points,
             LearningDirectionId = user.LearningDirectionId,
-            IsNewUser = isNewUser
+            IsNewUser = authResult.IsNewUser
         };
     }
 }
