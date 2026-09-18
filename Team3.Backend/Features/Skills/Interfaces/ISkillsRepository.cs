@@ -8,7 +8,7 @@ public interface ISkillsRepository
 
     Task<Skill?> GetByIdAsync(Guid skillId);
 
-    Task<User?> GetUserByFirebaseUidAsync(string firebaseUid);
+    Task<User?> GetUserByIdAsync(Guid userId);
 
     Task<bool> UserHasSkillAsync(Guid userId, Guid skillId);
 

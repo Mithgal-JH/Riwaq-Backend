@@ -1,8 +1,13 @@
+using System.Security.Claims;
+using FirebaseAdmin;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Extensions;
+using Team3.Backend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +17,17 @@ var connectionString =
 
 // Initialize Firebase Admin SDK.
 FirebaseAuthenticationService.Initialize();
+
+var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
+    ?? Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID")
+    ?? FirebaseApp.DefaultInstance?.Options.ProjectId;
+
+if (string.IsNullOrWhiteSpace(firebaseProjectId))
+{
+    throw new InvalidOperationException(
+        "Firebase project ID is not configured. Set Firebase:ProjectId " +
+        "or FIREBASE_PROJECT_ID.");
+}
 
 var databaseUrl = builder.Configuration["DATABASE_URL"];
 
@@ -34,6 +50,31 @@ if (!string.IsNullOrWhiteSpace(databaseUrl))
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority =
+            $"https://securetoken.google.com/{firebaseProjectId}";
+        options.Audience = firebaseProjectId;
+        options.MapInboundClaims = false;
+        options.RequireHttpsMetadata = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer =
+                $"https://securetoken.google.com/{firebaseProjectId}",
+            ValidateAudience = true,
+            ValidAudience = firebaseProjectId,
+            ValidateLifetime = true,
+            NameClaimType = "sub",
+            RoleClaimType = ClaimTypes.Role
+        };
+    });
+
+builder.Services.AddAuthorization();
+builder.Services.AddHttpContextAccessor();
+
 // Register application services and Identity.
 builder.Services.AddApplicationServices();
 
@@ -53,6 +94,17 @@ builder.Services.AddSwaggerGen(options =>
             Description = "Backend API for BinX Team 3"
         }
     );
+
+    options.AddSecurityDefinition(
+        "Bearer",
+        new Microsoft.OpenApi.OpenApiSecurityScheme
+        {
+            Type = Microsoft.OpenApi.SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            Description = "Firebase ID token"
+        }
+    );
 });
 
 var app = builder.Build();
@@ -69,6 +121,10 @@ app.UseSwaggerUI(options =>
 
     options.RoutePrefix = "swagger";
 });
+
+app.UseAuthentication();
+app.UseMiddleware<UserProvisioningMiddleware>();
+app.UseAuthorization();
 
 app.MapControllers();
 

@@ -1,38 +1,42 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.Experiences.Dtos;
 using Team3.Backend.Features.Experiences.Interfaces;
 
 namespace Team3.Backend.Features.Experiences;
 
 [ApiController]
+[Authorize]
 [Route("api/profiles/me/experiences")]
 public class ExperiencesController : ControllerBase
 {
     private readonly IExperiencesService _experiencesService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public ExperiencesController(IExperiencesService experiencesService)
+    public ExperiencesController(
+        IExperiencesService experiencesService,
+        ICurrentUserService currentUserService)
     {
         _experiencesService = experiencesService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ExperienceResponse>>>
         GetMyExperiences()
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             return Ok(await _experiencesService
-                .GetMyExperiencesAsync(firebaseUid));
+                .GetMyExperiencesAsync(userId.Value));
         }
         catch (KeyNotFoundException exception)
         {
@@ -44,20 +48,17 @@ public class ExperiencesController : ControllerBase
     public async Task<ActionResult<ExperienceResponse>> Create(
         [FromBody] CreateExperienceRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _experiencesService.CreateAsync(
-                firebaseUid,
+                userId.Value,
                 request);
 
             return CreatedAtAction(
@@ -78,20 +79,17 @@ public class ExperiencesController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ExperienceResponse>> GetById(Guid id)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _experiencesService
-                .GetByIdAsync(firebaseUid, id);
+                .GetByIdAsync(userId.Value, id);
 
             return response is null
                 ? NotFound(new { message = "Experience not found." })
@@ -112,20 +110,17 @@ public class ExperiencesController : ControllerBase
         Guid id,
         [FromBody] UpdateExperienceRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             return Ok(await _experiencesService.UpdateAsync(
-                firebaseUid,
+                userId.Value,
                 id,
                 request));
         }
@@ -142,19 +137,16 @@ public class ExperiencesController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
-            await _experiencesService.DeleteAsync(firebaseUid, id);
+            await _experiencesService.DeleteAsync(userId.Value, id);
             return NoContent();
         }
         catch (ArgumentException exception)
@@ -167,12 +159,4 @@ public class ExperiencesController : ControllerBase
         }
     }
 
-    private string? GetFirebaseUidFromRequest()
-    {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
-
-        return string.IsNullOrWhiteSpace(firebaseUid)
-            ? null
-            : firebaseUid;
-    }
 }

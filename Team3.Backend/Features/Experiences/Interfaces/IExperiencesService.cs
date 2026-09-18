@@ -5,20 +5,20 @@ namespace Team3.Backend.Features.Experiences.Interfaces;
 public interface IExperiencesService
 {
     Task<IReadOnlyList<ExperienceResponse>> GetMyExperiencesAsync(
-        string firebaseUid);
+        Guid userId);
 
     Task<ExperienceResponse> CreateAsync(
-        string firebaseUid,
+        Guid userId,
         CreateExperienceRequest request);
 
     Task<ExperienceResponse?> GetByIdAsync(
-        string firebaseUid,
+        Guid userId,
         Guid experienceId);
 
     Task<ExperienceResponse> UpdateAsync(
-        string firebaseUid,
+        Guid userId,
         Guid experienceId,
         UpdateExperienceRequest request);
 
-    Task DeleteAsync(string firebaseUid, Guid experienceId);
+    Task DeleteAsync(Guid userId, Guid experienceId);
 }

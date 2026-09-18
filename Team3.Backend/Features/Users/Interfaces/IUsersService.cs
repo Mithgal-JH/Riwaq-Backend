@@ -5,16 +5,16 @@ namespace Team3.Backend.Features.Users.Interfaces;
 public interface IUsersService
 {
     Task<UserProfileResponse?> GetMyProfileAsync(
-        string firebaseUid
+        Guid userId
     );
 
     Task<UserProfileResponse> UpdateMyProfileAsync(
-        string firebaseUid,
+        Guid userId,
         UpdateProfileRequest request
     );
 
     Task<UserProfileResponse> SelectLearningDirectionAsync(
-        string firebaseUid,
+        Guid userId,
         SelectLearningDirectionRequest request
     );
 

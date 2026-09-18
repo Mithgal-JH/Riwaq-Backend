@@ -1,4 +1,5 @@
 using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Team3.Backend.Features.Authentication.Dtos;
 using Team3.Backend.Features.Authentication.Interfaces;
@@ -18,6 +19,7 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("firebase-login")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> FirebaseLogin(
         [FromBody] FirebaseLoginRequest request)
     {

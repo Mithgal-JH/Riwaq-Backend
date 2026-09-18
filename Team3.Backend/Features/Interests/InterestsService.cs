@@ -26,9 +26,9 @@ public class InterestsService : IInterestsService
     }
 
     public async Task<IReadOnlyList<InterestResponse>> GetMyInterestsAsync(
-        string firebaseUid)
+        Guid userId)
     {
-        var user = await GetUserAsync(firebaseUid);
+        var user = await GetUserAsync(userId);
         var interests = user.UserInterests
             .Select(userInterest => userInterest.Interest)
             .OrderBy(interest => interest.Name)
@@ -38,10 +38,10 @@ public class InterestsService : IInterestsService
     }
 
     public async Task<InterestResponse> AddMyInterestAsync(
-        string firebaseUid,
+        Guid userId,
         Guid interestId)
     {
-        var user = await GetUserAsync(firebaseUid);
+        var user = await GetUserAsync(userId);
         var interest = await _interestsRepository.GetByIdAsync(interestId);
 
         if (interest is null)
@@ -68,10 +68,10 @@ public class InterestsService : IInterestsService
     }
 
     public async Task<bool> RemoveMyInterestAsync(
-        string firebaseUid,
+        Guid userId,
         Guid interestId)
     {
-        var user = await GetUserAsync(firebaseUid);
+        var user = await GetUserAsync(userId);
         var removed = await _interestsRepository.RemoveUserInterestAsync(
             user.Id,
             interestId);
@@ -86,10 +86,10 @@ public class InterestsService : IInterestsService
         return true;
     }
 
-    private async Task<User> GetUserAsync(string firebaseUid)
+    private async Task<User> GetUserAsync(Guid userId)
     {
         var user = await _interestsRepository
-            .GetUserByFirebaseUidAsync(firebaseUid);
+            .GetUserByIdAsync(userId);
 
         return user ?? throw new KeyNotFoundException("User not found.");
     }

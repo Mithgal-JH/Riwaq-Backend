@@ -4,7 +4,7 @@ namespace Team3.Backend.Features.Experiences.Interfaces;
 
 public interface IExperiencesRepository
 {
-    Task<User?> GetUserByFirebaseUidAsync(string firebaseUid);
+    Task<User?> GetUserByIdAsync(Guid userId);
 
     Task<List<Experience>> GetByUserIdAsync(Guid userId);
 

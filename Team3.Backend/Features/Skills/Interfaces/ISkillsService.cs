@@ -8,9 +8,9 @@ public interface ISkillsService
 
     Task<SkillResponse?> GetByIdAsync(Guid skillId);
 
-    Task<IReadOnlyList<SkillResponse>> GetMySkillsAsync(string firebaseUid);
+    Task<IReadOnlyList<SkillResponse>> GetMySkillsAsync(Guid userId);
 
-    Task<SkillResponse> AddMySkillAsync(string firebaseUid, Guid skillId);
+    Task<SkillResponse> AddMySkillAsync(Guid userId, Guid skillId);
 
-    Task<bool> RemoveMySkillAsync(string firebaseUid, Guid skillId);
+    Task<bool> RemoveMySkillAsync(Guid userId, Guid skillId);
 }

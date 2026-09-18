@@ -9,13 +9,13 @@ public interface IInterestsService
     Task<InterestResponse?> GetByIdAsync(Guid interestId);
 
     Task<IReadOnlyList<InterestResponse>> GetMyInterestsAsync(
-        string firebaseUid);
+        Guid userId);
 
     Task<InterestResponse> AddMyInterestAsync(
-        string firebaseUid,
+        Guid userId,
         Guid interestId);
 
     Task<bool> RemoveMyInterestAsync(
-        string firebaseUid,
+        Guid userId,
         Guid interestId);
 }

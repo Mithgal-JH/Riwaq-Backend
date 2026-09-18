@@ -29,12 +29,12 @@ public class SkillsRepository : ISkillsRepository
             .FirstOrDefaultAsync(skill => skill.Id == skillId);
     }
 
-    public async Task<User?> GetUserByFirebaseUidAsync(string firebaseUid)
+    public async Task<User?> GetUserByIdAsync(Guid userId)
     {
         return await _context.Users
             .Include(user => user.UserSkills)
                 .ThenInclude(userSkill => userSkill.Skill)
-            .FirstOrDefaultAsync(user => user.FirebaseUid == firebaseUid);
+            .FirstOrDefaultAsync(user => user.Id == userId);
     }
 
     public async Task<bool> UserHasSkillAsync(Guid userId, Guid skillId)

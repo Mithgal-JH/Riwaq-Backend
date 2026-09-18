@@ -29,12 +29,12 @@ public class InterestsRepository : IInterestsRepository
             .FirstOrDefaultAsync(interest => interest.Id == interestId);
     }
 
-    public async Task<User?> GetUserByFirebaseUidAsync(string firebaseUid)
+    public async Task<User?> GetUserByIdAsync(Guid userId)
     {
         return await _context.Users
             .Include(user => user.UserInterests)
                 .ThenInclude(userInterest => userInterest.Interest)
-            .FirstOrDefaultAsync(user => user.FirebaseUid == firebaseUid);
+            .FirstOrDefaultAsync(user => user.Id == userId);
     }
 
     public async Task<bool> UserHasInterestAsync(
