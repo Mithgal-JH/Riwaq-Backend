@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.Interests.Dtos;
 using Team3.Backend.Features.Interests.Interfaces;
 
@@ -9,10 +11,14 @@ namespace Team3.Backend.Features.Interests;
 public class InterestsController : ControllerBase
 {
     private readonly IInterestsService _interestsService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public InterestsController(IInterestsService interestsService)
+    public InterestsController(
+        IInterestsService interestsService,
+        ICurrentUserService currentUserService)
     {
         _interestsService = interestsService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
@@ -33,23 +39,21 @@ public class InterestsController : ControllerBase
     }
 
     [HttpGet("/api/profiles/me/interests")]
+    [Authorize]
     public async Task<ActionResult<IReadOnlyList<InterestResponse>>>
         GetMyInterests()
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             return Ok(await _interestsService
-                .GetMyInterestsAsync(firebaseUid));
+                .GetMyInterestsAsync(userId.Value));
         }
         catch (KeyNotFoundException exception)
         {
@@ -58,23 +62,21 @@ public class InterestsController : ControllerBase
     }
 
     [HttpPut("/api/profiles/me/interests/{interestId:guid}")]
+    [Authorize]
     public async Task<ActionResult<InterestResponse>> AddMyInterest(
         Guid interestId)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _interestsService
-                .AddMyInterestAsync(firebaseUid, interestId);
+                .AddMyInterestAsync(userId.Value, interestId);
 
             return Ok(response);
         }
@@ -89,22 +91,20 @@ public class InterestsController : ControllerBase
     }
 
     [HttpDelete("/api/profiles/me/interests/{interestId:guid}")]
+    [Authorize]
     public async Task<IActionResult> RemoveMyInterest(Guid interestId)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             await _interestsService.RemoveMyInterestAsync(
-                firebaseUid,
+                userId.Value,
                 interestId);
 
             return NoContent();
@@ -115,12 +115,4 @@ public class InterestsController : ControllerBase
         }
     }
 
-    private string? GetFirebaseUidFromRequest()
-    {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
-
-        return string.IsNullOrWhiteSpace(firebaseUid)
-            ? null
-            : firebaseUid;
-    }
 }

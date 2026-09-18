@@ -26,9 +26,9 @@ public class SkillsService : ISkillsService
     }
 
     public async Task<IReadOnlyList<SkillResponse>> GetMySkillsAsync(
-        string firebaseUid)
+        Guid userId)
     {
-        var user = await GetUserAsync(firebaseUid);
+        var user = await GetUserAsync(userId);
         var skills = user.UserSkills
             .Select(userSkill => userSkill.Skill)
             .OrderBy(skill => skill.Name)
@@ -38,10 +38,10 @@ public class SkillsService : ISkillsService
     }
 
     public async Task<SkillResponse> AddMySkillAsync(
-        string firebaseUid,
+        Guid userId,
         Guid skillId)
     {
-        var user = await GetUserAsync(firebaseUid);
+        var user = await GetUserAsync(userId);
         var skill = await _skillsRepository.GetByIdAsync(skillId);
 
         if (skill is null)
@@ -66,10 +66,10 @@ public class SkillsService : ISkillsService
     }
 
     public async Task<bool> RemoveMySkillAsync(
-        string firebaseUid,
+        Guid userId,
         Guid skillId)
     {
-        var user = await GetUserAsync(firebaseUid);
+        var user = await GetUserAsync(userId);
         var removed = await _skillsRepository.RemoveUserSkillAsync(
             user.Id,
             skillId);
@@ -84,10 +84,10 @@ public class SkillsService : ISkillsService
         return true;
     }
 
-    private async Task<User> GetUserAsync(string firebaseUid)
+    private async Task<User> GetUserAsync(Guid userId)
     {
         var user = await _skillsRepository
-            .GetUserByFirebaseUidAsync(firebaseUid);
+            .GetUserByIdAsync(userId);
 
         return user ?? throw new KeyNotFoundException("User not found.");
     }

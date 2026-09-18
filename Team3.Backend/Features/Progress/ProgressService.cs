@@ -15,37 +15,36 @@ public class ProgressService : IProgressService
     }
 
     public async Task<IReadOnlyList<ProgressResponse>> GetMyProgressAsync(
-        string firebaseUid)
+        Guid userId)
     {
-        var user = await GetUserAsync(firebaseUid);
-        var progress = await _progressRepository.GetByUserIdAsync(user.Id);
+        await EnsureUserExistsAsync(userId);
+        var progress = await _progressRepository.GetByUserIdAsync(userId);
 
         return progress.Select(MapToResponse).ToList();
     }
 
     public async Task<ProgressResponse?> GetByIdAsync(
-        string firebaseUid,
+        Guid userId,
         Guid progressId)
     {
         ValidateId(progressId);
 
-        var user = await GetUserAsync(firebaseUid);
         var progress = await _progressRepository.GetByIdForUserAsync(
             progressId,
-            user.Id);
+            userId);
 
         return progress is null ? null : MapToResponse(progress);
     }
 
     public async Task<ProgressResponse> CreateAsync(
-        string firebaseUid,
+        Guid userId,
         CreateProgressRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidateId(request.LearningDirectionId);
         ValidateLevel(request.Level);
 
-        var user = await GetUserAsync(firebaseUid);
+        await EnsureUserExistsAsync(userId);
         var learningDirection = await _progressRepository
             .GetLearningDirectionByIdAsync(request.LearningDirectionId);
 
@@ -55,7 +54,7 @@ public class ProgressService : IProgressService
         }
 
         if (await _progressRepository.ExistsForUserAsync(
-                user.Id,
+                userId,
                 request.LearningDirectionId))
         {
             throw new InvalidOperationException(
@@ -65,7 +64,7 @@ public class ProgressService : IProgressService
         var progress = new ProgressEntity
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            UserId = userId,
             LearningDirectionId = request.LearningDirectionId,
             Level = request.Level.Trim(),
             StartedAt = request.StartedAt,
@@ -79,7 +78,7 @@ public class ProgressService : IProgressService
     }
 
     public async Task<ProgressResponse> UpdateAsync(
-        string firebaseUid,
+        Guid userId,
         Guid progressId,
         UpdateProgressRequest request)
     {
@@ -87,9 +86,8 @@ public class ProgressService : IProgressService
         ValidateId(progressId);
         ValidateLevel(request.Level);
 
-        var user = await GetUserAsync(firebaseUid);
         var progress = await _progressRepository
-            .GetTrackedByIdForUserAsync(progressId, user.Id);
+            .GetTrackedByIdForUserAsync(progressId, userId);
 
         if (progress is null)
         {
@@ -104,20 +102,19 @@ public class ProgressService : IProgressService
 
         var updatedProgress = await _progressRepository.GetByIdForUserAsync(
             progressId,
-            user.Id);
+            userId);
 
         return updatedProgress is null
             ? MapToResponse(progress)
             : MapToResponse(updatedProgress);
     }
 
-    public async Task DeleteAsync(string firebaseUid, Guid progressId)
+    public async Task DeleteAsync(Guid userId, Guid progressId)
     {
         ValidateId(progressId);
 
-        var user = await GetUserAsync(firebaseUid);
         var progress = await _progressRepository
-            .GetTrackedByIdForUserAsync(progressId, user.Id);
+            .GetTrackedByIdForUserAsync(progressId, userId);
 
         if (progress is null)
         {
@@ -128,12 +125,15 @@ public class ProgressService : IProgressService
         await _progressRepository.SaveChangesAsync();
     }
 
-    private async Task<User> GetUserAsync(string firebaseUid)
+    private async Task EnsureUserExistsAsync(Guid userId)
     {
         var user = await _progressRepository
-            .GetUserByFirebaseUidAsync(firebaseUid);
+            .GetUserByIdAsync(userId);
 
-        return user ?? throw new KeyNotFoundException("User not found.");
+        if (user is null)
+        {
+            throw new KeyNotFoundException("User not found.");
+        }
     }
 
     private static void ValidateId(Guid id)

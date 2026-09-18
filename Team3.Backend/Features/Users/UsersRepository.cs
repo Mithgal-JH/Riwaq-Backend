@@ -14,14 +14,6 @@ public class UsersRepository : IUsersRepository
         _context = context;
     }
 
-    public async Task<User?> GetByFirebaseUidWithProfileAsync(
-        string firebaseUid)
-    {
-        return await _context.Users
-            .Include(x => x.Profile)
-            .FirstOrDefaultAsync(x => x.FirebaseUid == firebaseUid);
-    }
-
     public async Task<User?> GetByIdWithProfileAsync(Guid id)
     {
         return await _context.Users

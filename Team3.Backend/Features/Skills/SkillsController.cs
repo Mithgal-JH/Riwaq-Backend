@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.Skills.Dtos;
 using Team3.Backend.Features.Skills.Interfaces;
 
@@ -9,10 +11,14 @@ namespace Team3.Backend.Features.Skills;
 public class SkillsController : ControllerBase
 {
     private readonly ISkillsService _skillsService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public SkillsController(ISkillsService skillsService)
+    public SkillsController(
+        ISkillsService skillsService,
+        ICurrentUserService currentUserService)
     {
         _skillsService = skillsService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
@@ -32,21 +38,19 @@ public class SkillsController : ControllerBase
     }
 
     [HttpGet("/api/profiles/me/skills")]
+    [Authorize]
     public async Task<ActionResult<IReadOnlyList<SkillResponse>>> GetMySkills()
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
-            return Ok(await _skillsService.GetMySkillsAsync(firebaseUid));
+            return Ok(await _skillsService.GetMySkillsAsync(userId.Value));
         }
         catch (KeyNotFoundException exception)
         {
@@ -55,22 +59,20 @@ public class SkillsController : ControllerBase
     }
 
     [HttpPut("/api/profiles/me/skills/{skillId:guid}")]
+    [Authorize]
     public async Task<ActionResult<SkillResponse>> AddMySkill(Guid skillId)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _skillsService.AddMySkillAsync(
-                firebaseUid,
+                userId.Value,
                 skillId);
 
             return Ok(response);
@@ -86,21 +88,19 @@ public class SkillsController : ControllerBase
     }
 
     [HttpDelete("/api/profiles/me/skills/{skillId:guid}")]
+    [Authorize]
     public async Task<IActionResult> RemoveMySkill(Guid skillId)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
-            await _skillsService.RemoveMySkillAsync(firebaseUid, skillId);
+            await _skillsService.RemoveMySkillAsync(userId.Value, skillId);
             return NoContent();
         }
         catch (KeyNotFoundException exception)
@@ -109,12 +109,4 @@ public class SkillsController : ControllerBase
         }
     }
 
-    private string? GetFirebaseUidFromRequest()
-    {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
-
-        return string.IsNullOrWhiteSpace(firebaseUid)
-            ? null
-            : firebaseUid;
-    }
 }

@@ -5,20 +5,20 @@ namespace Team3.Backend.Features.Progress.Interfaces;
 public interface IProgressService
 {
     Task<IReadOnlyList<ProgressResponse>> GetMyProgressAsync(
-        string firebaseUid);
+        Guid userId);
 
     Task<ProgressResponse?> GetByIdAsync(
-        string firebaseUid,
+        Guid userId,
         Guid progressId);
 
     Task<ProgressResponse> CreateAsync(
-        string firebaseUid,
+        Guid userId,
         CreateProgressRequest request);
 
     Task<ProgressResponse> UpdateAsync(
-        string firebaseUid,
+        Guid userId,
         Guid progressId,
         UpdateProgressRequest request);
 
-    Task DeleteAsync(string firebaseUid, Guid progressId);
+    Task DeleteAsync(Guid userId, Guid progressId);
 }

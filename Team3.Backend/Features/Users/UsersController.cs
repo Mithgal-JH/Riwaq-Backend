@@ -1,35 +1,39 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.Users.Dtos;
 using Team3.Backend.Features.Users.Interfaces;
 
 namespace Team3.Backend.Features.Users;
 
 [ApiController]
+[Authorize]
 [Route("api/users")]
 public class UsersController : ControllerBase
 {
     private readonly IUsersService _usersService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public UsersController(IUsersService usersService)
+    public UsersController(
+        IUsersService usersService,
+        ICurrentUserService currentUserService)
     {
         _usersService = usersService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet("me")]
     public async Task<ActionResult<UserProfileResponse>> GetMyProfile()
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         var response = await _usersService
-            .GetMyProfileAsync(firebaseUid);
+            .GetMyProfileAsync(userId.Value);
 
         if (response is null)
         {
@@ -46,20 +50,17 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<UserProfileResponse>> UpdateMyProfile(
         [FromBody] UpdateProfileRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _usersService
-                .UpdateMyProfileAsync(firebaseUid, request);
+                .UpdateMyProfileAsync(userId.Value, request);
 
             return Ok(response);
         }
@@ -77,20 +78,17 @@ public class UsersController : ControllerBase
         SelectLearningDirection(
             [FromBody] SelectLearningDirectionRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _usersService
-                .SelectLearningDirectionAsync(firebaseUid, request);
+                .SelectLearningDirectionAsync(userId.Value, request);
 
             return Ok(response);
         }
@@ -111,6 +109,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     public async Task<ActionResult<PublicUserProfileResponse>> GetPublicProfile(
         Guid id)
     {
@@ -127,12 +126,4 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
-    private string? GetFirebaseUidFromRequest()
-    {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
-
-        return string.IsNullOrWhiteSpace(firebaseUid)
-            ? null
-            : firebaseUid;
-    }
 }

@@ -14,10 +14,10 @@ public class UsersService : IUsersService
     }
 
     public async Task<UserProfileResponse?> GetMyProfileAsync(
-        string firebaseUid)
+        Guid userId)
     {
         var user = await _usersRepository
-            .GetByFirebaseUidWithProfileAsync(firebaseUid);
+            .GetByIdWithProfileAsync(userId);
 
         if (user is null)
         {
@@ -28,11 +28,11 @@ public class UsersService : IUsersService
     }
 
     public async Task<UserProfileResponse> UpdateMyProfileAsync(
-        string firebaseUid,
+        Guid userId,
         UpdateProfileRequest request)
     {
         var user = await _usersRepository
-            .GetByFirebaseUidWithProfileAsync(firebaseUid);
+            .GetByIdWithProfileAsync(userId);
 
         if (user is null)
         {
@@ -70,11 +70,11 @@ public class UsersService : IUsersService
     }
 
     public async Task<UserProfileResponse> SelectLearningDirectionAsync(
-        string firebaseUid,
+        Guid userId,
         SelectLearningDirectionRequest request)
     {
         var user = await _usersRepository
-            .GetByFirebaseUidWithProfileAsync(firebaseUid);
+            .GetByIdWithProfileAsync(userId);
 
         if (user is null)
         {

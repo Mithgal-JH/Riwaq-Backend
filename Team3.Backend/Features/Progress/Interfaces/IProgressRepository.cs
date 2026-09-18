@@ -5,7 +5,7 @@ namespace Team3.Backend.Features.Progress.Interfaces;
 
 public interface IProgressRepository
 {
-    Task<User?> GetUserByFirebaseUidAsync(string firebaseUid);
+    Task<User?> GetUserByIdAsync(Guid userId);
 
     Task<List<ProgressEntity>> GetByUserIdAsync(Guid userId);
 

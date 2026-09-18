@@ -1,38 +1,42 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.Progress.Dtos;
 using Team3.Backend.Features.Progress.Interfaces;
 
 namespace Team3.Backend.Features.Progress;
 
 [ApiController]
+[Authorize]
 [Route("api/users/me/progress")]
 public class ProgressController : ControllerBase
 {
     private readonly IProgressService _progressService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public ProgressController(IProgressService progressService)
+    public ProgressController(
+        IProgressService progressService,
+        ICurrentUserService currentUserService)
     {
         _progressService = progressService;
+        _currentUserService = currentUserService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProgressResponse>>>
         GetMyProgress()
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             return Ok(await _progressService
-                .GetMyProgressAsync(firebaseUid));
+                .GetMyProgressAsync(userId.Value));
         }
         catch (KeyNotFoundException exception)
         {
@@ -43,20 +47,17 @@ public class ProgressController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProgressResponse>> GetById(Guid id)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _progressService
-                .GetByIdAsync(firebaseUid, id);
+                .GetByIdAsync(userId.Value, id);
 
             return response is null
                 ? NotFound(new { message = "Progress not found." })
@@ -76,20 +77,17 @@ public class ProgressController : ControllerBase
     public async Task<ActionResult<ProgressResponse>> Create(
         [FromBody] CreateProgressRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             var response = await _progressService.CreateAsync(
-                firebaseUid,
+                userId.Value,
                 request);
 
             return CreatedAtAction(
@@ -116,20 +114,17 @@ public class ProgressController : ControllerBase
         Guid id,
         [FromBody] UpdateProgressRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
             return Ok(await _progressService.UpdateAsync(
-                firebaseUid,
+                userId.Value,
                 id,
                 request));
         }
@@ -146,19 +141,16 @@ public class ProgressController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var userId = _currentUserService.UserId;
 
-        if (firebaseUid is null)
+        if (userId is null)
         {
-            return BadRequest(new
-            {
-                message = "X-Firebase-Uid header is required."
-            });
+            return Unauthorized();
         }
 
         try
         {
-            await _progressService.DeleteAsync(firebaseUid, id);
+            await _progressService.DeleteAsync(userId.Value, id);
             return NoContent();
         }
         catch (ArgumentException exception)
@@ -171,12 +163,4 @@ public class ProgressController : ControllerBase
         }
     }
 
-    private string? GetFirebaseUidFromRequest()
-    {
-        var firebaseUid = Request.Headers["X-Firebase-Uid"].ToString();
-
-        return string.IsNullOrWhiteSpace(firebaseUid)
-            ? null
-            : firebaseUid;
-    }
 }

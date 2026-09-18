@@ -14,27 +14,26 @@ public class ExperiencesService : IExperiencesService
     }
 
     public async Task<IReadOnlyList<ExperienceResponse>> GetMyExperiencesAsync(
-        string firebaseUid)
+        Guid userId)
     {
-        var user = await GetUserAsync(firebaseUid);
-        var experiences = await _experiencesRepository
-            .GetByUserIdAsync(user.Id);
+        await EnsureUserExistsAsync(userId);
+        var experiences = await _experiencesRepository.GetByUserIdAsync(userId);
 
         return experiences.Select(MapToResponse).ToList();
     }
 
     public async Task<ExperienceResponse> CreateAsync(
-        string firebaseUid,
+        Guid userId,
         CreateExperienceRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
         ValidateTitle(request.Title);
 
-        var user = await GetUserAsync(firebaseUid);
+        await EnsureUserExistsAsync(userId);
         var experience = new Experience
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            UserId = userId,
             Title = request.Title.Trim(),
             Description = request.Description
         };
@@ -46,21 +45,20 @@ public class ExperiencesService : IExperiencesService
     }
 
     public async Task<ExperienceResponse?> GetByIdAsync(
-        string firebaseUid,
+        Guid userId,
         Guid experienceId)
     {
         ValidateId(experienceId);
 
-        var user = await GetUserAsync(firebaseUid);
         var experience = await _experiencesRepository.GetByIdForUserAsync(
             experienceId,
-            user.Id);
+            userId);
 
         return experience is null ? null : MapToResponse(experience);
     }
 
     public async Task<ExperienceResponse> UpdateAsync(
-        string firebaseUid,
+        Guid userId,
         Guid experienceId,
         UpdateExperienceRequest request)
     {
@@ -68,10 +66,9 @@ public class ExperiencesService : IExperiencesService
         ValidateId(experienceId);
         ValidateTitle(request.Title);
 
-        var user = await GetUserAsync(firebaseUid);
         var experience = await _experiencesRepository.GetByIdForUserAsync(
             experienceId,
-            user.Id);
+            userId);
 
         if (experience is null)
         {
@@ -85,14 +82,13 @@ public class ExperiencesService : IExperiencesService
         return MapToResponse(experience);
     }
 
-    public async Task DeleteAsync(string firebaseUid, Guid experienceId)
+    public async Task DeleteAsync(Guid userId, Guid experienceId)
     {
         ValidateId(experienceId);
 
-        var user = await GetUserAsync(firebaseUid);
         var experience = await _experiencesRepository.GetByIdForUserAsync(
             experienceId,
-            user.Id);
+            userId);
 
         if (experience is null)
         {
@@ -103,12 +99,14 @@ public class ExperiencesService : IExperiencesService
         await _experiencesRepository.SaveChangesAsync();
     }
 
-    private async Task<User> GetUserAsync(string firebaseUid)
+    private async Task EnsureUserExistsAsync(Guid userId)
     {
-        var user = await _experiencesRepository
-            .GetUserByFirebaseUidAsync(firebaseUid);
+        var user = await _experiencesRepository.GetUserByIdAsync(userId);
 
-        return user ?? throw new KeyNotFoundException("User not found.");
+        if (user is null)
+        {
+            throw new KeyNotFoundException("User not found.");
+        }
     }
 
     private static void ValidateTitle(string? title)

@@ -2,6 +2,7 @@ using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Team3.Backend.Models;
 
 namespace Team3.Backend.Features.Authentication;
@@ -89,10 +90,8 @@ public class FirebaseAuthenticationService
             );
         }
 
-        var existingUser = await _userManager.FindByLoginAsync(
-            "Firebase",
-            firebaseUid
-        );
+        var existingUser = await _userManager.Users
+            .FirstOrDefaultAsync(user => user.FirebaseUid == firebaseUid);
 
         if (existingUser is not null)
         {
@@ -107,6 +106,27 @@ public class FirebaseAuthenticationService
 
         if (existingUser is not null)
         {
+            if (!string.IsNullOrWhiteSpace(existingUser.FirebaseUid)
+                && existingUser.FirebaseUid != firebaseUid)
+            {
+                throw new InvalidOperationException(
+                    "The email address is already linked to another Firebase account.");
+            }
+
+            existingUser.FirebaseUid = firebaseUid;
+
+            var updateResult = await _userManager.UpdateAsync(existingUser);
+
+            if (!updateResult.Succeeded)
+            {
+                var errors = string.Join(
+                    ", ",
+                    updateResult.Errors.Select(error => error.Description));
+
+                throw new InvalidOperationException(
+                    $"Failed to link the Firebase account: {errors}");
+            }
+
             return new FirebaseAuthUserResult
             {
                 User = existingUser,

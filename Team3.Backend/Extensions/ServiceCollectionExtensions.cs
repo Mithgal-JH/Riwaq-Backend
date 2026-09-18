@@ -37,6 +37,10 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<FirebaseAuthenticationService>();
 
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+        services.AddScoped<IUserProvisioningService, UserProvisioningService>();
+
         services.AddScoped<IUsersRepository, UsersRepository>();
 
         services.AddScoped<IUsersService, UsersService>();

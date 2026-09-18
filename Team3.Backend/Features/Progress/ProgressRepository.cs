@@ -15,11 +15,11 @@ public class ProgressRepository : IProgressRepository
         _context = context;
     }
 
-    public async Task<User?> GetUserByFirebaseUidAsync(string firebaseUid)
+    public async Task<User?> GetUserByIdAsync(Guid userId)
     {
         return await _context.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(user => user.FirebaseUid == firebaseUid);
+            .FirstOrDefaultAsync(user => user.Id == userId);
     }
 
     public async Task<List<ProgressEntity>> GetByUserIdAsync(Guid userId)

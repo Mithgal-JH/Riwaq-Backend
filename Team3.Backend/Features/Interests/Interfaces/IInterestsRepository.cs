@@ -8,7 +8,7 @@ public interface IInterestsRepository
 
     Task<Interest?> GetByIdAsync(Guid interestId);
 
-    Task<User?> GetUserByFirebaseUidAsync(string firebaseUid);
+    Task<User?> GetUserByIdAsync(Guid userId);
 
     Task<bool> UserHasInterestAsync(Guid userId, Guid interestId);
 
