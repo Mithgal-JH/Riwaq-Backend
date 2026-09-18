@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Features.Authentication.Interfaces;
+using Team3.Backend.Features.EducationalContent;
+using Team3.Backend.Features.EducationalContent.Interfaces;
 using Team3.Backend.Features.Experiences;
 using Team3.Backend.Features.Experiences.Interfaces;
 using Team3.Backend.Features.Interests;
@@ -58,6 +60,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILearningDirectionsRepository, LearningDirectionsRepository>();
 
         services.AddScoped<ILearningDirectionsService, LearningDirectionsService>();
+
+        // Register Educational Content interaction services.
+        services.AddScoped<
+            IEducationalContentInteractionsRepository,
+            EducationalContentInteractionsRepository>();
+
+        services.AddScoped<
+            IEducationalContentInteractionsService,
+            EducationalContentInteractionsService>();
 
         return services;
     }
