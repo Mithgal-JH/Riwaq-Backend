@@ -18,8 +18,14 @@ public class AuthenticationController : ControllerBase
         _authenticationService = authenticationService;
     }
 
+    /// <summary>
+    /// Authenticates with a Firebase ID token and returns the local user.
+    /// </summary>
     [HttpPost("firebase-login")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponse>> FirebaseLogin(
         [FromBody] FirebaseLoginRequest request)
     {

@@ -22,7 +22,13 @@ public class ProgressController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Returns progress records owned by the authenticated user.
+    /// </summary>
     [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<ProgressResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IReadOnlyList<ProgressResponse>>>
         GetMyProgress()
     {
@@ -44,7 +50,14 @@ public class ProgressController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns an authenticated user's progress record by ID.
+    /// </summary>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ProgressResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProgressResponse>> GetById(Guid id)
     {
         var userId = _currentUserService.UserId;
@@ -73,7 +86,15 @@ public class ProgressController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Creates a progress record for the authenticated user.
+    /// </summary>
     [HttpPost]
+    [ProducesResponseType(typeof(ProgressResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ProgressResponse>> Create(
         [FromBody] CreateProgressRequest request)
     {
@@ -109,7 +130,14 @@ public class ProgressController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates a progress record owned by the authenticated user.
+    /// </summary>
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ProgressResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProgressResponse>> Update(
         Guid id,
         [FromBody] UpdateProgressRequest request)
@@ -138,7 +166,14 @@ public class ProgressController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes a progress record owned by the authenticated user.
+    /// </summary>
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = _currentUserService.UserId;

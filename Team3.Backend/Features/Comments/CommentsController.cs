@@ -18,7 +18,13 @@ public CommentsController(ICommentsService commentsService)
 }
 
 // Get all comments for educational content.
+/// <summary>
+/// Returns comments for educational content.
+/// </summary>
 [HttpGet("educational-content/{educationalContentId:guid}/comments")]
+[ProducesResponseType(typeof(List<CommentResponse>), StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
 public async Task<ActionResult<List<CommentResponse>>> GetByContentId(
     Guid educationalContentId)
 {
@@ -30,7 +36,13 @@ public async Task<ActionResult<List<CommentResponse>>> GetByContentId(
 }
 
 // Create a comment for educational content.
+/// <summary>
+/// Creates a comment using the authenticated Firebase user header.
+/// </summary>
 [HttpPost("educational-content/{educationalContentId:guid}/comments")]
+[ProducesResponseType(typeof(CommentResponse), StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
 public async Task<ActionResult<CommentResponse>> Create(
     Guid educationalContentId,
     [FromBody] CreateCommentRequest request)
@@ -65,7 +77,14 @@ public async Task<ActionResult<CommentResponse>> Create(
 }
 
 // Update an existing comment.
+/// <summary>
+/// Updates a comment owned by the authenticated Firebase user.
+/// </summary>
 [HttpPatch("comments/{commentId:guid}")]
+[ProducesResponseType(typeof(CommentResponse), StatusCodes.Status200OK)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
 public async Task<ActionResult<CommentResponse>> Update(
     Guid commentId,
     [FromBody] UpdateCommentRequest request)
@@ -107,7 +126,14 @@ public async Task<ActionResult<CommentResponse>> Update(
 }
 
 // Delete an existing comment.
+/// <summary>
+/// Deletes a comment owned by the authenticated Firebase user.
+/// </summary>
 [HttpDelete("comments/{commentId:guid}")]
+[ProducesResponseType(StatusCodes.Status204NoContent)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
 public async Task<IActionResult> Delete(Guid commentId)
 {
     var firebaseUid = GetFirebaseUidFromRequest();
