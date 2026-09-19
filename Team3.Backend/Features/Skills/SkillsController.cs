@@ -21,13 +21,22 @@ public class SkillsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Returns the available standardized skills.
+    /// </summary>
     [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<SkillResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<SkillResponse>>> GetSkills()
     {
         return Ok(await _skillsService.GetAllAsync());
     }
 
+    /// <summary>
+    /// Returns a standardized skill by ID.
+    /// </summary>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(SkillResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<SkillResponse>> GetSkill(Guid id)
     {
         var response = await _skillsService.GetByIdAsync(id);
@@ -37,8 +46,14 @@ public class SkillsController : ControllerBase
             : Ok(response);
     }
 
+    /// <summary>
+    /// Returns skills associated with the authenticated user's profile.
+    /// </summary>
     [HttpGet("/api/profiles/me/skills")]
     [Authorize]
+    [ProducesResponseType(typeof(IReadOnlyList<SkillResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IReadOnlyList<SkillResponse>>> GetMySkills()
     {
         var userId = _currentUserService.UserId;
@@ -58,8 +73,15 @@ public class SkillsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Associates an existing skill with the authenticated user's profile.
+    /// </summary>
     [HttpPut("/api/profiles/me/skills/{skillId:guid}")]
     [Authorize]
+    [ProducesResponseType(typeof(SkillResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<SkillResponse>> AddMySkill(Guid skillId)
     {
         var userId = _currentUserService.UserId;
@@ -87,8 +109,14 @@ public class SkillsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Removes a skill from the authenticated user's profile.
+    /// </summary>
     [HttpDelete("/api/profiles/me/skills/{skillId:guid}")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RemoveMySkill(Guid skillId)
     {
         var userId = _currentUserService.UserId;

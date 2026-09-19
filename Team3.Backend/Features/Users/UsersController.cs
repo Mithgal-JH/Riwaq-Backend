@@ -22,7 +22,13 @@ public class UsersController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Returns the authenticated user's profile.
+    /// </summary>
     [HttpGet("me")]
+    [ProducesResponseType(typeof(UserProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserProfileResponse>> GetMyProfile()
     {
         var userId = _currentUserService.UserId;
@@ -46,7 +52,13 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Updates the authenticated user's profile.
+    /// </summary>
     [HttpPut("me")]
+    [ProducesResponseType(typeof(UserProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserProfileResponse>> UpdateMyProfile(
         [FromBody] UpdateProfileRequest request)
     {
@@ -73,7 +85,14 @@ public class UsersController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Selects the authenticated user's learning direction skill.
+    /// </summary>
     [HttpPut("me/learning-direction")]
+    [ProducesResponseType(typeof(UserProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserProfileResponse>>
         SelectLearningDirection(
             [FromBody] SelectLearningDirectionRequest request)
@@ -108,8 +127,13 @@ public class UsersController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns a public user profile by local user ID.
+    /// </summary>
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(PublicUserProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<PublicUserProfileResponse>> GetPublicProfile(
         Guid id)
     {

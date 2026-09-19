@@ -22,7 +22,13 @@ public class ExperiencesController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Returns experiences owned by the authenticated user.
+    /// </summary>
     [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<ExperienceResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<IReadOnlyList<ExperienceResponse>>>
         GetMyExperiences()
     {
@@ -44,7 +50,14 @@ public class ExperiencesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Creates an experience for the authenticated user.
+    /// </summary>
     [HttpPost]
+    [ProducesResponseType(typeof(ExperienceResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ExperienceResponse>> Create(
         [FromBody] CreateExperienceRequest request)
     {
@@ -76,7 +89,14 @@ public class ExperiencesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns an experience owned by the authenticated user.
+    /// </summary>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ExperienceResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ExperienceResponse>> GetById(Guid id)
     {
         var userId = _currentUserService.UserId;
@@ -105,7 +125,14 @@ public class ExperiencesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Updates an experience owned by the authenticated user.
+    /// </summary>
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ExperienceResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ExperienceResponse>> Update(
         Guid id,
         [FromBody] UpdateExperienceRequest request)
@@ -134,7 +161,14 @@ public class ExperiencesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes an experience owned by the authenticated user.
+    /// </summary>
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
         var userId = _currentUserService.UserId;

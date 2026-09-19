@@ -22,7 +22,12 @@ public sealed class NotificationsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
+    /// <summary>
+    /// Returns notifications belonging to the authenticated user.
+    /// </summary>
     [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<NotificationResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<IReadOnlyList<NotificationResponse>>> GetMine()
     {
         if (!TryGetUserId(out var userId))
@@ -33,7 +38,12 @@ public sealed class NotificationsController : ControllerBase
         return Ok(await _service.GetMineAsync(userId));
     }
 
+    /// <summary>
+    /// Returns the authenticated user's unread notification count.
+    /// </summary>
     [HttpGet("unread-count")]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<int>> GetUnreadCount()
     {
         if (!TryGetUserId(out var userId))
@@ -44,7 +54,14 @@ public sealed class NotificationsController : ControllerBase
         return Ok(await _service.GetUnreadCountAsync(userId));
     }
 
+    /// <summary>
+    /// Updates the read state of an owned notification.
+    /// </summary>
     [HttpPatch("{notificationId:guid}")]
+    [ProducesResponseType(typeof(NotificationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<NotificationResponse>> Update(
         Guid notificationId,
         UpdateNotificationRequest request)
@@ -71,7 +88,12 @@ public sealed class NotificationsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Marks all notifications belonging to the authenticated user as read.
+    /// </summary>
     [HttpPost("mark-all-as-read")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> MarkAllAsRead()
     {
         if (!TryGetUserId(out var userId))
@@ -83,7 +105,14 @@ public sealed class NotificationsController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes a notification belonging to the authenticated user.
+    /// </summary>
     [HttpDelete("{notificationId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid notificationId)
     {
         if (!TryGetUserId(out var userId))
