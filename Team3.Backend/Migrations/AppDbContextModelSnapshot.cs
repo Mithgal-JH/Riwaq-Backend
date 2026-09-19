@@ -560,6 +560,9 @@ namespace Team3.Backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("RelatedEntityId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
@@ -569,7 +572,10 @@ namespace Team3.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
+
+                    b.HasIndex("UserId", "Type", "RelatedEntityId")
+                        .IsUnique();
 
                     b.ToTable("Notifications");
                 });
