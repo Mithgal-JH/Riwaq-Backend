@@ -10,6 +10,12 @@ public class PointsTransaction
 
     public string Reason { get; set; } = string.Empty;
 
+    public PointsTransactionType TransactionType { get; set; }
+
+    public Guid? RelatedUserId { get; set; }
+
+    public Guid? MentoringSessionId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public User User { get; set; } = null!;

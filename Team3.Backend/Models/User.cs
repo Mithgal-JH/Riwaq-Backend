@@ -14,7 +14,7 @@ public class User : IdentityUser<Guid>
 
     public Profile? Profile { get; set; }
 
-    public int Points { get; set; }
+    public int Points { get; set; } = 50;
 
     public ICollection<SkillVerificationRequest> RequestedSkillVerifications { get; set; } =
         new List<SkillVerificationRequest>();

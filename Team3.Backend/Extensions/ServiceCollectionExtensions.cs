@@ -12,6 +12,7 @@ using Team3.Backend.Features.LearningDirections;
 using Team3.Backend.Features.LearningDirections.Interfaces;
 using Team3.Backend.Features.Progress;
 using Team3.Backend.Features.Progress.Interfaces;
+using Team3.Backend.Features.Points;
 using Team3.Backend.Features.Skills;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
@@ -60,6 +61,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProgressRepository, ProgressRepository>();
 
         services.AddScoped<IProgressService, ProgressService>();
+
+        services.AddScoped<PointsService>();
 
         services.AddScoped<ILearningDirectionsRepository, LearningDirectionsRepository>();
 

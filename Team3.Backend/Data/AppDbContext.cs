@@ -53,6 +53,8 @@ public class AppDbContext
     public DbSet<PointsTransaction> PointsTransactions =>
         Set<PointsTransaction>();
 
+    public DbSet<PointsPurchase> PointsPurchases => Set<PointsPurchase>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -63,6 +65,9 @@ public class AppDbContext
 
             entity.Property(x => x.FirebaseUid)
                 .IsRequired();
+
+            entity.Property(x => x.Points)
+                .HasDefaultValue(50);
 
             entity.HasIndex(x => x.FirebaseUid)
                 .IsUnique();
@@ -77,6 +82,56 @@ public class AppDbContext
                 .HasForeignKey(x => x.LearningDirectionId)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PointsTransaction>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Reason)
+                .IsRequired();
+
+            entity.Property(x => x.TransactionType)
+                .HasConversion<string>()
+                .HasDefaultValue(PointsTransactionType.Legacy)
+                .IsRequired();
+
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.TransactionType
+            })
+            .IsUnique()
+            .HasFilter("\"TransactionType\" = 'InitialBalance'");
+
+            entity.HasIndex(x => x.MentoringSessionId)
+                .IsUnique()
+                .HasFilter("\"MentoringSessionId\" IS NOT NULL");
+
+            entity.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.RelatedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<PointsPurchase>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.PackageId).IsRequired();
+            entity.Property(x => x.IdempotencyKey).IsRequired();
+            entity.Property(x => x.Currency).IsRequired();
+            entity.Property(x => x.PaymentMethod).IsRequired();
+            entity.Property(x => x.Status).IsRequired();
+            entity.Property(x => x.Reference).IsRequired();
+            entity.Property(x => x.Price).HasPrecision(18, 2);
+
+            entity.HasIndex(x => new { x.UserId, x.IdempotencyKey })
+                .IsUnique();
+
+            entity.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Profile>(entity =>
