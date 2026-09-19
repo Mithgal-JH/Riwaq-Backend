@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Notifications.Dtos;
 using Team3.Backend.Features.Notifications.Interfaces;
@@ -9,10 +10,17 @@ namespace Team3.Backend.Features.Notifications;
 public sealed class NotificationsService : INotificationsService
 {
     private readonly AppDbContext _context;
+    private readonly INotificationRealtimePublisher? _realtimePublisher;
+    private readonly ILogger<NotificationsService>? _logger;
 
-    public NotificationsService(AppDbContext context)
+    public NotificationsService(
+        AppDbContext context,
+        INotificationRealtimePublisher? realtimePublisher = null,
+        ILogger<NotificationsService>? logger = null)
     {
         _context = context;
+        _realtimePublisher = realtimePublisher;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyList<NotificationResponse>> GetMineAsync(Guid userId)
@@ -98,7 +106,7 @@ public sealed class NotificationsService : INotificationsService
             return;
         }
 
-        _context.Notifications.Add(new Notification
+        var notification = new Notification
         {
             Id = Guid.NewGuid(),
             UserId = userId,
@@ -107,9 +115,29 @@ public sealed class NotificationsService : INotificationsService
             IsRead = false,
             CreatedAt = DateTime.UtcNow,
             RelatedEntityId = relatedEntityId
-        });
+        };
+
+        _context.Notifications.Add(notification);
 
         await _context.SaveChangesAsync();
+
+        if (_realtimePublisher is not null)
+        {
+            try
+            {
+                await _realtimePublisher.PublishAsync(
+                    userId,
+                    Map(notification));
+            }
+            catch (Exception exception)
+            {
+                _logger?.LogWarning(
+                    exception,
+                    "Realtime notification publishing failed for local user {UserId} and notification {NotificationId}.",
+                    userId,
+                    notification.Id);
+            }
+        }
     }
 
     private async Task<Notification> GetForUserAsync(Guid userId, Guid notificationId)

@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using FluentAssertions;
+using Moq;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Notifications;
+using Team3.Backend.Features.Notifications.Dtos;
+using Team3.Backend.Features.Notifications.Interfaces;
 using Team3.Backend.Models;
 
 namespace Team3.Backend.Tests;
@@ -114,6 +117,60 @@ public sealed class NotificationsServiceTests
         var act = () => service.DeleteAsync(Guid.NewGuid(), notificationId);
 
         await act.Should().ThrowAsync<KeyNotFoundException>();
+        context.Notifications.Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task CreateAsyncPublishesOnlyAfterNotificationIsPersisted()
+    {
+        await using var context = CreateContext();
+        var publisher = new Mock<INotificationRealtimePublisher>();
+        var userId = Guid.NewGuid();
+        var observedPersistence = false;
+
+        publisher
+            .Setup(item => item.PublishAsync(
+                userId,
+                It.IsAny<NotificationResponse>()))
+            .Callback(() => observedPersistence = context.Notifications.Any())
+            .Returns(Task.CompletedTask);
+
+        var service = new NotificationsService(context, publisher.Object);
+
+        await service.CreateAsync(
+            userId,
+            NotificationType.ConnectionRequestReceived,
+            "A request arrived.",
+            Guid.NewGuid());
+
+        observedPersistence.Should().BeTrue();
+        publisher.Verify(item => item.PublishAsync(
+            userId,
+            It.Is<NotificationResponse>(notification =>
+                notification.IsRead == false
+                && notification.Type == nameof(NotificationType.ConnectionRequestReceived))),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateAsyncKeepsPersistedNotificationWhenPublishingFails()
+    {
+        await using var context = CreateContext();
+        var publisher = new Mock<INotificationRealtimePublisher>();
+        publisher
+            .Setup(item => item.PublishAsync(
+                It.IsAny<Guid>(),
+                It.IsAny<NotificationResponse>()))
+            .ThrowsAsync(new InvalidOperationException("Temporary delivery failure."));
+
+        var service = new NotificationsService(context, publisher.Object);
+
+        await service.CreateAsync(
+            Guid.NewGuid(),
+            NotificationType.CommentReceived,
+            "A comment arrived.",
+            Guid.NewGuid());
+
         context.Notifications.Should().ContainSingle();
     }
 

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FirebaseAdmin;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -98,6 +99,7 @@ builder.Services
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 
 // Register application services and Identity.
 builder.Services.AddApplicationServices();
@@ -152,5 +154,7 @@ app.UseMiddleware<UserProvisioningMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<Team3.Backend.Features.Notifications.NotificationsHub>(
+    "/hubs/notifications");
 
 app.Run();
