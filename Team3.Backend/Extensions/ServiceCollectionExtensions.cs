@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Features.Authentication.Interfaces;
@@ -22,6 +23,8 @@ using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
 using Team3.Backend.Features.Comments;
 using Team3.Backend.Features.Comments.Interfaces;
+using Team3.Backend.Features.Notifications;
+using Team3.Backend.Features.Notifications.Interfaces;
 
 namespace Team3.Backend.Extensions;
 
@@ -90,7 +93,7 @@ public static class ServiceCollectionExtensions
             IEducationalContentInteractionsService,
             EducationalContentInteractionsService>();
 
-     
+
 
         // Register Comment services.
         services.AddScoped<
@@ -108,6 +111,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IConnectionRequestsService,
             ConnectionRequestsService>();
+
+        services.AddScoped<INotificationsService, NotificationsService>();
+        services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
+        services.AddSingleton<IUserIdProvider, LocalUserIdProvider>();
 
         return services;
     }
