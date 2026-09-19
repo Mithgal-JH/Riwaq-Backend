@@ -47,9 +47,14 @@ public class ConnectionRequestsRepository : IConnectionRequestsRepository
     {
         return await _context.ConnectionRequests
             .FirstOrDefaultAsync(request =>
-                request.SenderUserId == senderUserId &&
-                request.ReceiverUserId == receiverUserId &&
-                request.Status == "Pending");
+                request.Status == "Pending" &&
+                (
+                    (request.SenderUserId == senderUserId &&
+                     request.ReceiverUserId == receiverUserId)
+                    ||
+                    (request.SenderUserId == receiverUserId &&
+                     request.ReceiverUserId == senderUserId)
+                ));
     }
 
     public async Task<bool> AreUsersConnectedAsync(
