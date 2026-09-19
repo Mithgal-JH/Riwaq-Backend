@@ -40,6 +40,11 @@ public class UserProvisioningServiceTests
         user.FirebaseUid.Should().Be("firebase-new");
         user.Email.Should().Be("new@example.com");
         user.EmailConfirmed.Should().BeTrue();
+        user.Points.Should().Be(50);
+        fixture.DbContext.PointsTransactions.Should().ContainSingle(transaction =>
+            transaction.UserId == user.Id
+            && transaction.Amount == 50
+            && transaction.TransactionType == PointsTransactionType.InitialBalance);
         (await fixture.UserManager.GetRolesAsync(user)).Should().Equal("User");
         principal.FindFirstValue(ClaimTypes.NameIdentifier)
             .Should().Be(user.Id.ToString());
