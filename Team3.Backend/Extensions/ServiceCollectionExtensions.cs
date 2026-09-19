@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Features.Authentication.Interfaces;
+using Team3.Backend.Features.ConnectionRequests;
+using Team3.Backend.Features.ConnectionRequests.Interfaces;
 using Team3.Backend.Features.EducationalContent;
 using Team3.Backend.Features.EducationalContent.Interfaces;
 using Team3.Backend.Features.Experiences;
@@ -99,6 +101,13 @@ public static class ServiceCollectionExtensions
             ICommentsService,
             CommentsService>();
 
+        services.AddScoped<
+            IConnectionRequestsRepository,
+            ConnectionRequestsRepository>();
+
+        services.AddScoped<
+            IConnectionRequestsService,
+            ConnectionRequestsService>();
 
         return services;
     }

@@ -234,3 +234,197 @@ Result:
 Build succeeded.
 ```
 
+---
+
+## 3. Comments
+
+The Comments feature is implemented as a separate backend feature module under the Post Interaction & Engagement functionality.
+
+### What was implemented
+
+The feature supports:
+
+- Creating comments on educational content
+- Retrieving comments for educational content
+- Updating comments
+- Deleting comments
+- Replying to comments using `parentCommentId`
+- Ownership checks for update and delete operations
+- Educational content existence validation
+- Parent comment validation to ensure replies belong to the same educational content
+
+### API Endpoints
+
+| Method | Endpoint | Purpose |
+| ------ | -------- | ------- |
+| GET | `/api/educational-content/{contentId}/comments` | Get comments for educational content |
+| POST | `/api/educational-content/{contentId}/comments` | Create a comment |
+| PATCH | `/api/comments/{id}` | Update a comment |
+| DELETE | `/api/comments/{id}` | Delete a comment |
+
+### Request Data
+
+Creating a comment supports:
+
+| Field | Description |
+| ----- | ----------- |
+| `content` | Comment text |
+| `parentCommentId` | Optional ID of the parent comment when creating a reply |
+
+Updating a comment supports:
+
+| Field | Description |
+| ----- | ----------- |
+| `content` | Updated comment text |
+
+### Business Rules
+
+- A comment must belong to an existing educational content item.
+- Comment content cannot be empty.
+- A reply must reference a comment belonging to the same educational content.
+- Only the comment owner can update or delete the comment.
+- Replies use the same Comment resource through `parentCommentId`; a separate Reply resource is not required.
+- The authenticated user's local `UserId` is resolved from the Firebase UID.
+
+### Code
+
+- [CommentsController](Team3.Backend/Features/Comments/CommentsController.cs)
+- [CommentsService](Team3.Backend/Features/Comments/CommentsService.cs)
+- [CommentsRepository](Team3.Backend/Features/Comments/CommentsRepository.cs)
+- [ICommentsService](Team3.Backend/Features/Comments/Interfaces/ICommentsService.cs)
+- [ICommentsRepository](Team3.Backend/Features/Comments/Interfaces/ICommentsRepository.cs)
+
+### DTOs
+
+- [CommentResponse](Team3.Backend/Features/Comments/DTOs/CommentResponse.cs)
+- [CreateCommentRequest](Team3.Backend/Features/Comments/DTOs/CreateCommentRequest.cs)
+- [UpdateCommentRequest](Team3.Backend/Features/Comments/DTOs/UpdateCommentRequest.cs)
+
+### Data Model
+
+- [Comment](Team3.Backend/Models/Comment.cs)
+
+The `Comment` model contains:
+
+- `Id`
+- `UserId`
+- `EducationalContentId`
+- `ParentCommentId`
+- `Content`
+- `CreatedAt`
+- `UpdatedAt`
+
+The `ParentCommentId` relationship supports nested replies while using the same Comment entity.
+
+### Verification
+
+The Comments implementation was included in the successful project build.
+
+## 4. Connection Requests
+
+The Connection Requests feature allows users to send connection requests, view sent and received requests, and manage the request status.
+
+### What was implemented
+
+The feature supports:
+
+* Sending connection requests
+* Retrieving received connection requests
+* Retrieving sent connection requests
+* Accepting connection requests
+* Rejecting connection requests
+* Cancelling pending connection requests
+* Preventing connection requests to the current user
+* Preventing duplicate pending requests
+* Preventing connection requests between already connected users
+* Creating a Connection automatically when a request is accepted
+* Authorization checks so only the sender or receiver can update a request
+* Validating supported request statuses
+
+### API Endpoints
+
+| Method | Endpoint                            | Purpose                              |
+| ------ | ----------------------------------- | ------------------------------------ |
+| POST   | `/api/connection-requests`          | Send a connection request            |
+| GET    | `/api/connection-requests/received` | Get received connection requests     |
+| GET    | `/api/connection-requests/sent`     | Get sent connection requests         |
+| PATCH  | `/api/connection-requests/{id}`     | Update the connection request status |
+
+### Request Data
+
+Sending a connection request supports:
+
+| Field            | Description                                            |
+| ---------------- | ------------------------------------------------------ |
+| `receiverUserId` | ID of the user who will receive the connection request |
+
+Updating a connection request supports:
+
+| Field    | Description        |
+| -------- | ------------------ |
+| `status` | New request status |
+
+Supported statuses:
+
+* `Pending`
+* `Accepted`
+* `Rejected`
+* `Cancelled`
+
+### Business Rules
+
+* A user cannot send a connection request to themselves.
+* A connection request cannot be created if the users are already connected.
+* A duplicate pending request between the same sender and receiver is not allowed.
+* Only the sender can cancel a pending request.
+* Only the receiver can accept or reject a pending request.
+* A connection is created automatically when a request is accepted.
+* Only the sender or receiver can update the connection request.
+* The authenticated user's local `UserId` is resolved from the Firebase UID.
+* The Firebase UID is obtained from the `X-Firebase-Uid` request header.
+
+### Code
+
+* [ConnectionRequestsController](Team3.Backend/Features/ConnectionRequests/ConnectionRequestsController.cs)
+* [ConnectionRequestsService](Team3.Backend/Features/ConnectionRequests/ConnectionRequestsService.cs)
+* [ConnectionRequestsRepository](Team3.Backend/Features/ConnectionRequests/ConnectionRequestsRepository.cs)
+* [IConnectionRequestsService](Team3.Backend/Features/ConnectionRequests/Interfaces/IConnectionRequestsService.cs)
+* [IConnectionRequestsRepository](Team3.Backend/Features/ConnectionRequests/Interfaces/IConnectionRequestsRepository.cs)
+
+### DTOs
+
+* [ConnectionRequestResponse](Team3.Backend/Features/ConnectionRequests/DTOs/ConnectionRequestResponse.cs)
+* [SendConnectionRequestRequest](Team3.Backend/Features/ConnectionRequests/DTOs/SendConnectionRequestRequest.cs)
+* [UpdateConnectionRequestStatusRequest](Team3.Backend/Features/ConnectionRequests/DTOs/UpdateConnectionRequestStatusRequest.cs)
+
+### Data Model
+
+* [ConnectionRequest](Team3.Backend/Models/ConnectionRequest.cs)
+* [Connection](Team3.Backend/Models/Connection.cs)
+
+The `ConnectionRequest` model contains:
+
+* `Id`
+* `SenderUserId`
+* `ReceiverUserId`
+* `Status`
+* `CreatedAt`
+* `UpdatedAt`
+
+The `Connection` model is created when a connection request is accepted.
+
+### Verification
+
+The Connection Requests implementation was successfully compiled using:
+
+```powershell
+dotnet build .\Team3.Backend\Team3.Backend.csproj
+```
+
+Result:
+
+```text
+Build succeeded.
+```
+
+---
