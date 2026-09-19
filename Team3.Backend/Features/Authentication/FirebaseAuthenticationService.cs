@@ -3,6 +3,7 @@ using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Team3.Backend.Data;
 using Team3.Backend.Models;
 
 namespace Team3.Backend.Features.Authentication;
@@ -10,10 +11,14 @@ namespace Team3.Backend.Features.Authentication;
 public class FirebaseAuthenticationService
 {
     private readonly UserManager<User> _userManager;
+    private readonly AppDbContext _context;
 
-    public FirebaseAuthenticationService(UserManager<User> userManager)
+    public FirebaseAuthenticationService(
+        UserManager<User> userManager,
+        AppDbContext context)
     {
         _userManager = userManager;
+        _context = context;
     }
 
     public static void Initialize()
@@ -139,7 +144,8 @@ public class FirebaseAuthenticationService
             UserName = firebaseEmail,
             Email = firebaseEmail,
             FirebaseUid = firebaseUid,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            Points = 50
         };
 
         var result = await _userManager.CreateAsync(newUser);
@@ -164,6 +170,17 @@ public class FirebaseAuthenticationService
                 "Firebase"
             )
         );
+
+        _context.PointsTransactions.Add(new PointsTransaction
+        {
+            Id = Guid.NewGuid(),
+            UserId = newUser.Id,
+            Amount = newUser.Points,
+            TransactionType = PointsTransactionType.InitialBalance,
+            Reason = "Initial Points balance",
+            CreatedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
 
         return new FirebaseAuthUserResult
         {

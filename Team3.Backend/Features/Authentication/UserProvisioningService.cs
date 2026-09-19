@@ -42,10 +42,52 @@ public class UserProvisioningService : IUserProvisioningService
         if (user is null)
         {
             user = await CreateOrLoadUserAsync(principal, firebaseUid);
+            await EnsureInitialBalanceTransactionAsync(user);
         }
 
         await EnsureDefaultRoleAsync(user);
         await AddLocalClaimsAsync(principal, user);
+    }
+
+    private async Task EnsureInitialBalanceTransactionAsync(User user)
+    {
+        var existingTransaction = await _context.PointsTransactions
+            .FirstOrDefaultAsync(transaction =>
+                transaction.UserId == user.Id
+                && transaction.TransactionType == PointsTransactionType.InitialBalance);
+
+        if (existingTransaction is not null)
+        {
+            return;
+        }
+
+        var transaction = new PointsTransaction
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Amount = 50,
+            TransactionType = PointsTransactionType.InitialBalance,
+            Reason = "Initial Points balance",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.PointsTransactions.Add(transaction);
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            _context.Entry(transaction).State = EntityState.Detached;
+
+            if (!await _context.PointsTransactions.AnyAsync(existing =>
+                    existing.UserId == user.Id
+                    && existing.TransactionType == PointsTransactionType.InitialBalance))
+            {
+                throw;
+            }
+        }
     }
 
     private async Task<User> CreateOrLoadUserAsync(
