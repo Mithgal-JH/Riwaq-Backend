@@ -8,6 +8,8 @@ public interface ICommentsRepository
     Task<User?> GetUserByFirebaseUidAsync(string firebaseUid);
     // Check whether educational content exists.
     Task<bool> EducationalContentExistsAsync(Guid educationalContentId);
+
+    Task<Guid?> GetEducationalContentOwnerIdAsync(Guid educationalContentId);
     // Get all comments for a specific educational content.
     Task<List<Comment>> GetByContentIdAsync(Guid educationalContentId);
 

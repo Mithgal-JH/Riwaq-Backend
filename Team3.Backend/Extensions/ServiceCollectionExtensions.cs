@@ -22,6 +22,8 @@ using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
 using Team3.Backend.Features.Comments;
 using Team3.Backend.Features.Comments.Interfaces;
+using Team3.Backend.Features.Notifications;
+using Team3.Backend.Features.Notifications.Interfaces;
 
 namespace Team3.Backend.Extensions;
 
@@ -108,6 +110,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IConnectionRequestsService,
             ConnectionRequestsService>();
+
+        services.AddScoped<INotificationsService, NotificationsService>();
 
         return services;
     }
