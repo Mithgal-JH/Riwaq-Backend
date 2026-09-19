@@ -17,6 +17,8 @@ using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
 using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
+using Team3.Backend.Features.Comments;
+using Team3.Backend.Features.Comments.Interfaces;
 
 namespace Team3.Backend.Extensions;
 
@@ -61,6 +63,15 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ILearningDirectionsService, LearningDirectionsService>();
 
+        // Register Educational Content services.
+        services.AddScoped<
+            IEducationalContentRepository,
+            EducationalContentRepository>();
+
+        services.AddScoped<
+            IEducationalContentService,
+            EducationalContentService>();
+
         // Register Educational Content interaction services.
         services.AddScoped<
             IEducationalContentInteractionsRepository,
@@ -69,6 +80,18 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IEducationalContentInteractionsService,
             EducationalContentInteractionsService>();
+
+     
+
+        // Register Comment services.
+        services.AddScoped<
+            ICommentsRepository,
+            CommentsRepository>();
+
+        services.AddScoped<
+            ICommentsService,
+            CommentsService>();
+
 
         return services;
     }
