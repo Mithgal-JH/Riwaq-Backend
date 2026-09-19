@@ -153,6 +153,21 @@ public class EducationalContentService : IEducationalContentService
         {
             throw new ArgumentException("Content type is required.");
         }
+
+        var allowedContentTypes = new[]
+        {
+        "Text",
+        "Image",
+        "Video",
+        "File",
+        "ExternalLink"
+    };
+
+        if (!allowedContentTypes.Contains(contentType.Trim()))
+        {
+            throw new ArgumentException(
+                "Content type must be Text, Image, Video, File, or ExternalLink.");
+        }
     }
 
     private static void ValidateId(Guid contentId)
