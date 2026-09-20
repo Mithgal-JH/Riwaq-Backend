@@ -158,6 +158,7 @@ builder.Services.AddSwaggerGen(options =>
             "Progress" => "Progress",
             "Points" => "Points",
             "Notifications" => "Notifications",
+            "LearningSessions" => "Learning Sessions",
             "EducationalContent" => "Educational Content",
             "Comments" => "Comments",
             "ConnectionRequests" => "Connection Requests",
