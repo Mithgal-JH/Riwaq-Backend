@@ -144,7 +144,7 @@ The Share endpoint:
 - Returns `204 No Content`
 - Does not have a DELETE endpoint
 
-### Code### Code
+### Code
 
 - [EducationalContentController](Team3.Backend/Features/EducationalContent/EducationalContentController.cs)
 - [EducationalContentInteractionsService](Team3.Backend/Features/EducationalContent/EducationalContentInteractionsService.cs)
@@ -503,5 +503,204 @@ Result:
 
 ```text
 Build succeeded.
-76 tests passed.
+182 tests passed.
 ```
+
+## 6. Conversations & Messages
+
+The Conversations & Messages feature provides email-style conversations between users who have an established connection.
+
+### What was implemented
+
+The feature supports:
+
+- Retrieving the authenticated user's conversations
+- Retrieving a specific conversation
+- Retrieving messages within a conversation
+- Sending messages
+- Creating a conversation when the first message is sent
+- Updating messages
+- Authorization checks for conversation access
+- Ownership checks for message updates
+- Tracking conversation activity through `LastActivityAt`
+- Supporting a subject for the first conversation message
+
+### API Endpoints
+
+| Method | Endpoint                                       | Purpose                                    |
+| ------ | ---------------------------------------------- | ------------------------------------------ |
+| GET    | `/api/conversations`                           | Get the authenticated user's conversations |
+| GET    | `/api/conversations/{id}`                      | Get a specific conversation                |
+| GET    | `/api/conversations/{conversationId}/messages` | Get messages in a conversation             |
+| POST   | `/api/conversations/{conversationId}/messages` | Send a message                             |
+| PATCH  | `/api/messages/{id}`                           | Update a message                           |
+
+### Request Data
+
+Sending a message supports:
+
+| Field          | Description                                                                             |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `connectionId` | Optional when the conversation already exists; required when creating the first message |
+| `content`      | Message content                                                                         |
+| `subject`      | Conversation subject; required when creating the first message                          |
+
+Updating a message supports:
+
+| Field     | Description             |
+| --------- | ----------------------- |
+| `content` | Updated message content |
+
+### Response Data
+
+A conversation response contains:
+
+- `id`
+- `subject`
+- `participants`
+- `lastActivityAt`
+
+A message response contains:
+
+- `id`
+- `sender`
+- `content`
+- `createdAt`
+- `updatedAt`
+
+### Business Rules
+
+- Only participants of the associated connection can access the conversation.
+- A conversation is associated with a connection.
+- A conversation can be created when the first message is sent.
+- `connectionId` is required when creating the first conversation message.
+- The authenticated user must belong to the specified connection.
+- A connection cannot have more than one conversation.
+- `subject` is required when creating the first conversation message.
+- Message content cannot be empty.
+- The authenticated user is automatically recorded as the message sender.
+- Only the message owner can update a message.
+- `LastActivityAt` is updated when a message is sent or updated.
+- The authenticated user's local `UserId` is used to enforce authorization.
+
+### Code
+
+- [ConversationsController](Team3.Backend/Features/Conversations/ConversationsController.cs)
+- [ConversationsService](Team3.Backend/Features/Conversations/ConversationsService.cs)
+- [ConversationsRepository](Team3.Backend/Features/Conversations/ConversationsRepository.cs)
+- [IConversationsService](Team3.Backend/Features/Conversations/Interfaces/IConversationsService.cs)
+- [IConversationsRepository](Team3.Backend/Features/Conversations/Interfaces/IConversationsRepository.cs)
+
+### DTOs
+
+- [ConversationResponse](Team3.Backend/Features/Conversations/Dtos/ConversationResponse.cs)
+- [MessageResponse](Team3.Backend/Features/Conversations/Dtos/MessageResponse.cs)
+- [SendMessageRequest](Team3.Backend/Features/Conversations/Dtos/SendMessageRequest.cs)
+- [UpdateMessageRequest](Team3.Backend/Features/Conversations/Dtos/UpdateMessageRequest.cs)
+
+### Data Models
+
+- [Conversation](Team3.Backend/Models/Conversation.cs)
+- [Message](Team3.Backend/Models/Message.cs)
+
+The `Conversation` entity stores the conversation subject and activity information and is linked to a `Connection`.
+
+The `Message` entity stores the sender, content, timestamps, and associated conversation.
+
+## 7. Ratings
+
+The Ratings feature allows users to rate each other after completing a qualifying learning session.
+
+### What was implemented
+
+The feature supports:
+
+- Submitting a rating for another participant after a completed learning session
+- Scores from `1` to `5`
+- Optional written reviews
+- Preventing users from rating themselves
+- Preventing duplicate ratings by the same user for the same learning session
+- Identifying the other participant automatically as the rated user
+- Retrieving ratings received by a user
+- Authorization checks to ensure only learning session participants can submit ratings
+- Immutable ratings with no update endpoint
+
+### API Endpoints
+
+| Method | Endpoint                                     | Purpose                                           |
+| ------ | -------------------------------------------- | ------------------------------------------------- |
+| POST   | `/api/learning-sessions/{sessionId}/ratings` | Submit a rating for the other session participant |
+| GET    | `/api/profiles/{userId}/ratings`             | Get ratings received by a user                    |
+
+### Request Data
+
+Submitting a rating supports:
+
+| Field    | Description                  |
+| -------- | ---------------------------- |
+| `score`  | Rating score from `1` to `5` |
+| `review` | Optional written review      |
+
+Example request:
+
+```json
+{
+  "score": 5,
+  "review": "Very helpful session."
+}
+```
+
+### Response Data
+
+A rating response contains:
+
+- `id`
+- `score`
+- `review`
+- `rater`
+- `ratedUser`
+- `learningSessionId`
+- `createdAt`
+
+### Business Rules
+
+- Only participants of the associated learning session can submit a rating.
+- Ratings can only be submitted after the learning session is `Completed`.
+- A user cannot rate themselves.
+- Each participant can submit only one rating for the other participant in the same learning session.
+- The rated user is determined automatically from the session participants.
+- The authenticated user is recorded as the rater.
+- The score must be between `1` and `5`.
+- The review is optional.
+- Ratings cannot be edited after submission.
+- Ratings are linked to the actual learning session.
+- Ratings are retrieved by the user receiving them.
+
+### Code
+
+- [RatingsController](Team3.Backend/Features/Ratings/RatingsController.cs)
+- [RatingsService](Team3.Backend/Features/Ratings/RatingsService.cs)
+- [RatingsRepository](Team3.Backend/Features/Ratings/RatingsRepository.cs)
+- [IRatingsService](Team3.Backend/Features/Ratings/Interfaces/IRatingsService.cs)
+- [IRatingsRepository](Team3.Backend/Features/Ratings/Interfaces/IRatingsRepository.cs)
+
+### DTOs
+
+- [CreateRatingRequest](Team3.Backend/Features/Ratings/Dtos/CreateRatingRequest.cs)
+- [RatingResponse](Team3.Backend/Features/Ratings/Dtos/RatingResponse.cs)
+
+### Data Model
+
+- [Rating](Team3.Backend/Models/Rating.cs)
+
+The `Rating` entity contains:
+
+- `Id`
+- `LearningSessionId`
+- `RaterUserId`
+- `RatedUserId`
+- `Score`
+- `Review`
+- `CreatedAt`
+
+A unique constraint on `(LearningSessionId, RaterUserId)` prevents a user from submitting more than one rating for the same learning session.

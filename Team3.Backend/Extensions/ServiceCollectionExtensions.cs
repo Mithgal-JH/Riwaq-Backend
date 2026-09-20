@@ -18,6 +18,8 @@ using Team3.Backend.Features.LearningSessions.Interfaces;
 using Team3.Backend.Features.Progress;
 using Team3.Backend.Features.Progress.Interfaces;
 using Team3.Backend.Features.Points;
+using Team3.Backend.Features.Ratings;
+using Team3.Backend.Features.Ratings.Interfaces;
 using Team3.Backend.Features.Skills;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
@@ -134,6 +136,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IConversationsService,
             ConversationsService>();
+
+        services.AddScoped<IRatingsRepository, RatingsRepository>();
+        services.AddScoped<IRatingsService, RatingsService>();
 
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
