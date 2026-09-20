@@ -13,6 +13,8 @@ using Team3.Backend.Features.Interests;
 using Team3.Backend.Features.Interests.Interfaces;
 using Team3.Backend.Features.LearningDirections;
 using Team3.Backend.Features.LearningDirections.Interfaces;
+using Team3.Backend.Features.LearningSessions;
+using Team3.Backend.Features.LearningSessions.Interfaces;
 using Team3.Backend.Features.Progress;
 using Team3.Backend.Features.Progress.Interfaces;
 using Team3.Backend.Features.Points;
@@ -74,6 +76,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILearningDirectionsRepository, LearningDirectionsRepository>();
 
         services.AddScoped<ILearningDirectionsService, LearningDirectionsService>();
+
+        services.AddScoped<ILearningSessionsRepository, LearningSessionsRepository>();
+        services.AddScoped<ILearningSessionsService, LearningSessionsService>();
 
         // Register Educational Content services.
         services.AddScoped<
