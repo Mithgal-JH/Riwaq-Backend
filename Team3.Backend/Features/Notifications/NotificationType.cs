@@ -5,5 +5,9 @@ public enum NotificationType
     ConnectionRequestReceived,
     ConnectionRequestAccepted,
     ConnectionRequestRejected,
-    CommentReceived
+    CommentReceived,
+    SkillVerificationRequestReceived,
+    SkillVerificationRequestAccepted,
+    SkillVerificationRequestRejected,
+    SkillVerificationRequestCancelled
 }

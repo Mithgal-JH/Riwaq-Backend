@@ -20,6 +20,8 @@ using Team3.Backend.Features.Progress.Interfaces;
 using Team3.Backend.Features.Points;
 using Team3.Backend.Features.Ratings;
 using Team3.Backend.Features.Ratings.Interfaces;
+using Team3.Backend.Features.SkillVerificationRequests;
+using Team3.Backend.Features.SkillVerificationRequests.Interfaces;
 using Team3.Backend.Features.Skills;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
@@ -139,6 +141,9 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IRatingsRepository, RatingsRepository>();
         services.AddScoped<IRatingsService, RatingsService>();
+
+        services.AddScoped<ISkillVerificationRequestsRepository, SkillVerificationRequestsRepository>();
+        services.AddScoped<ISkillVerificationRequestsService, SkillVerificationRequestsService>();
 
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
