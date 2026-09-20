@@ -1,5 +1,7 @@
 using Team3.Backend.Features.Comments.DTOs;
 using Team3.Backend.Features.Comments.Interfaces;
+using Team3.Backend.Features.Notifications;
+using Team3.Backend.Features.Notifications.Interfaces;
 using Team3.Backend.Models;
 
 namespace Team3.Backend.Features.Comments;
@@ -7,11 +9,15 @@ namespace Team3.Backend.Features.Comments;
 public class CommentsService : ICommentsService
 {
     private readonly ICommentsRepository _repository;
+    private readonly INotificationsService _notificationsService;
 
     // Store the repository used to access comment data.
-    public CommentsService(ICommentsRepository repository)
+    public CommentsService(
+        ICommentsRepository repository,
+        INotificationsService notificationsService)
     {
         _repository = repository;
+        _notificationsService = notificationsService;
     }
 
     public async Task<List<CommentResponse>> GetByContentIdAsync(
@@ -98,6 +104,18 @@ public class CommentsService : ICommentsService
 
         _repository.Add(comment);
         await _repository.SaveChangesAsync();
+
+        var contentOwnerId = await _repository
+            .GetEducationalContentOwnerIdAsync(educationalContentId);
+
+        if (contentOwnerId is not null && contentOwnerId != user.Id)
+        {
+            await _notificationsService.CreateAsync(
+                contentOwnerId.Value,
+                NotificationType.CommentReceived,
+                "Someone commented on your educational content.",
+                comment.Id);
+        }
 
         return MapToResponse(comment);
     }

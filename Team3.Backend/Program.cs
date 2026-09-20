@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FirebaseAdmin;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -8,6 +9,7 @@ using Team3.Backend.Data;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Extensions;
 using Team3.Backend.Middleware;
+using Team3.Backend.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +100,7 @@ builder.Services
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 
 // Register application services and Identity.
 builder.Services.AddApplicationServices();
@@ -109,13 +112,21 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
+    var xmlDocumentationFile =
+        Path.Combine(AppContext.BaseDirectory, "Team3.Backend.xml");
+
+    options.IncludeXmlComments(xmlDocumentationFile);
+
     options.SwaggerDoc(
         "v1",
         new Microsoft.OpenApi.OpenApiInfo
         {
             Title = "Team3 Backend API",
             Version = "v1",
-            Description = "Backend API for BinX Team 3"
+            Description = "Backend API for BinX Team 3\n\n" +
+                "Realtime notifications: connect to /hubs/notifications " +
+                "and listen for NotificationReceived. The payload is " +
+                "NotificationResponse."
         }
     );
 
@@ -129,6 +140,31 @@ builder.Services.AddSwaggerGen(options =>
             Description = "Firebase ID token"
         }
     );
+
+    options.OperationFilter<AuthorizeOperationFilter>();
+
+    options.TagActionsBy(apiDescription =>
+    {
+        var controller = apiDescription.ActionDescriptor.RouteValues["controller"];
+
+        return [controller switch
+        {
+            "Authentication" => "Authentication",
+            "Users" => "Users",
+            "Skills" => "Skills",
+            "Interests" => "Interests",
+            "LearningDirections" => "Learning Directions",
+            "Experiences" => "Experiences",
+            "Progress" => "Progress",
+            "Points" => "Points",
+            "Notifications" => "Notifications",
+            "LearningSessions" => "Learning Sessions",
+            "EducationalContent" => "Educational Content",
+            "Comments" => "Comments",
+            "ConnectionRequests" => "Connection Requests",
+            _ => controller ?? "Other"
+        }];
+    });
 });
 
 var app = builder.Build();
@@ -152,5 +188,7 @@ app.UseMiddleware<UserProvisioningMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<Team3.Backend.Features.Notifications.NotificationsHub>(
+    "/hubs/notifications");
 
 app.Run();

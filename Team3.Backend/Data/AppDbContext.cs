@@ -391,6 +391,24 @@ public class AppDbContext
         {
             entity.HasKey(x => x.Id);
 
+            entity.Property(x => x.Type)
+                .HasConversion<string>()
+                .IsRequired();
+
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.IsRead,
+                x.CreatedAt
+            });
+
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.Type,
+                x.RelatedEntityId
+            }).IsUnique();
+
             entity.HasOne(x => x.User)
                 .WithMany(x => x.Notifications)
                 .HasForeignKey(x => x.UserId)

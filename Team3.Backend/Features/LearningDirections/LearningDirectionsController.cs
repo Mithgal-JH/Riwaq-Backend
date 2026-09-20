@@ -16,14 +16,23 @@ public class LearningDirectionsController : ControllerBase
         _learningDirectionsService = learningDirectionsService;
     }
 
+    /// <summary>
+    /// Returns all available learning directions.
+    /// </summary>
     [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<LearningDirectionResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<LearningDirectionResponse>>>
         GetLearningDirections()
     {
         return Ok(await _learningDirectionsService.GetAllAsync());
     }
 
+    /// <summary>
+    /// Returns a learning direction and its related skills by ID.
+    /// </summary>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(LearningDirectionDetailsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<LearningDirectionDetailsResponse>>
         GetLearningDirection(Guid id)
     {

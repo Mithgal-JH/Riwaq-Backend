@@ -15,7 +15,14 @@ public class ConnectionRequestsController : ControllerBase
         _service = service;
     }
 
+    /// <summary>
+    /// Sends a connection request using the authenticated Firebase user header.
+    /// </summary>
     [HttpPost]
+    [ProducesResponseType(typeof(ConnectionRequestResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ConnectionRequestResponse>> Send(
         [FromBody] SendConnectionRequestRequest request)
     {
@@ -48,7 +55,13 @@ public class ConnectionRequestsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns connection requests received by the Firebase user in the request header.
+    /// </summary>
     [HttpGet("received")]
+    [ProducesResponseType(typeof(List<ConnectionRequestResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<ConnectionRequestResponse>>> GetReceived()
     {
         var firebaseUid = GetFirebaseUidFromRequest();
@@ -72,7 +85,13 @@ public class ConnectionRequestsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Returns connection requests sent by the Firebase user in the request header.
+    /// </summary>
     [HttpGet("sent")]
+    [ProducesResponseType(typeof(List<ConnectionRequestResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<List<ConnectionRequestResponse>>> GetSent()
     {
         var firebaseUid = GetFirebaseUidFromRequest();
@@ -96,7 +115,14 @@ public class ConnectionRequestsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Accepts, rejects, or cancels a connection request according to ownership rules.
+    /// </summary>
     [HttpPatch("{connectionRequestId:guid}")]
+    [ProducesResponseType(typeof(ConnectionRequestResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ConnectionRequestResponse>> UpdateStatus(
         Guid connectionRequestId,
         [FromBody] UpdateConnectionRequestStatusRequest request)

@@ -1,5 +1,7 @@
 using Team3.Backend.Features.ConnectionRequests.Dtos;
 using Team3.Backend.Features.ConnectionRequests.Interfaces;
+using Team3.Backend.Features.Notifications;
+using Team3.Backend.Features.Notifications.Interfaces;
 using Team3.Backend.Features.Users.Dtos;
 using Team3.Backend.Models;
 
@@ -8,10 +10,14 @@ namespace Team3.Backend.Features.ConnectionRequests;
 public class ConnectionRequestsService : IConnectionRequestsService
 {
     private readonly IConnectionRequestsRepository _repository;
+    private readonly INotificationsService _notificationsService;
 
-    public ConnectionRequestsService(IConnectionRequestsRepository repository)
+    public ConnectionRequestsService(
+        IConnectionRequestsRepository repository,
+        INotificationsService notificationsService)
     {
         _repository = repository;
+        _notificationsService = notificationsService;
     }
 
     public async Task<ConnectionRequestResponse> SendAsync(
@@ -80,6 +86,12 @@ public class ConnectionRequestsService : IConnectionRequestsService
 
         _repository.Add(connectionRequest);
         await _repository.SaveChangesAsync();
+
+        await _notificationsService.CreateAsync(
+            receiver.Id,
+            NotificationType.ConnectionRequestReceived,
+            "You received a new connection request.",
+            connectionRequest.Id);
 
         return MapToResponse(connectionRequest);
     }
@@ -216,6 +228,23 @@ public class ConnectionRequestsService : IConnectionRequestsService
         connectionRequest.UpdatedAt = DateTime.UtcNow;
 
         await _repository.SaveChangesAsync();
+
+        if (requestedStatus == "Accepted")
+        {
+            await _notificationsService.CreateAsync(
+                connectionRequest.SenderUserId,
+                NotificationType.ConnectionRequestAccepted,
+                "Your connection request was accepted.",
+                connectionRequest.Id);
+        }
+        else if (requestedStatus == "Rejected")
+        {
+            await _notificationsService.CreateAsync(
+                connectionRequest.SenderUserId,
+                NotificationType.ConnectionRequestRejected,
+                "Your connection request was rejected.",
+                connectionRequest.Id);
+        }
 
         return MapToResponse(connectionRequest);
     }

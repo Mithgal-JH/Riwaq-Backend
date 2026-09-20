@@ -28,6 +28,15 @@ public class CommentsRepository : ICommentsRepository
         return await _context.EducationalContents
             .AnyAsync(content => content.Id == educationalContentId);
     }
+
+    public async Task<Guid?> GetEducationalContentOwnerIdAsync(
+        Guid educationalContentId)
+    {
+        return await _context.EducationalContents
+            .Where(content => content.Id == educationalContentId)
+            .Select(content => (Guid?)content.UserId)
+            .FirstOrDefaultAsync();
+    }
     public async Task<List<Comment>> GetByContentIdAsync(Guid educationalContentId)
     {
         // Get comments for the requested educational content.
