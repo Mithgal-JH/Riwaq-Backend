@@ -287,23 +287,26 @@ public class AppDbContext
         });
 
         modelBuilder.Entity<Connection>(entity =>
-        {
-            entity.HasKey(x => x.Id);
+   {
+       entity.HasKey(x => x.Id);
 
-            entity.HasCheckConstraint(
-                "CK_Connection_DifferentUsers",
-                "\"UserAId\" <> \"UserBId\"");
+       entity.HasIndex(x => new { x.UserAId, x.UserBId })
+           .IsUnique();
 
-            entity.HasOne(x => x.UserA)
-                .WithMany(x => x.ConnectionsAsUserA)
-                .HasForeignKey(x => x.UserAId)
-                .OnDelete(DeleteBehavior.Restrict);
+       entity.HasCheckConstraint(
+           "CK_Connection_DifferentUsers",
+           "\"UserAId\" <> \"UserBId\"");
 
-            entity.HasOne(x => x.UserB)
-                .WithMany(x => x.ConnectionsAsUserB)
-                .HasForeignKey(x => x.UserBId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
+       entity.HasOne(x => x.UserA)
+           .WithMany(x => x.ConnectionsAsUserA)
+           .HasForeignKey(x => x.UserAId)
+           .OnDelete(DeleteBehavior.Restrict);
+
+       entity.HasOne(x => x.UserB)
+           .WithMany(x => x.ConnectionsAsUserB)
+           .HasForeignKey(x => x.UserBId)
+           .OnDelete(DeleteBehavior.Restrict);
+   });
 
         modelBuilder.Entity<ConnectionRequest>(entity =>
         {
