@@ -27,6 +27,8 @@ using Team3.Backend.Features.Comments;
 using Team3.Backend.Features.Comments.Interfaces;
 using Team3.Backend.Features.Connections;
 using Team3.Backend.Features.Connections.Interfaces;
+using Team3.Backend.Features.Conversations;
+using Team3.Backend.Features.Conversations.Interfaces;
 using Team3.Backend.Features.Notifications;
 using Team3.Backend.Features.Notifications.Interfaces;
 
@@ -124,6 +126,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IConnectionsService,
             ConnectionsService>();
+
+        services.AddScoped<
+            IConversationsRepository,
+            ConversationsRepository>();
+
+        services.AddScoped<
+            IConversationsService,
+            ConversationsService>();
 
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
