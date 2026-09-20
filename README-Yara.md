@@ -704,3 +704,22 @@ The `Rating` entity contains:
 - `CreatedAt`
 
 A unique constraint on `(LearningSessionId, RaterUserId)` prevents a user from submitting more than one rating for the same learning session.
+### Skill Verification Requests
+
+Manages requests sent to a mentor to confirm completion of a specific skill.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/skill-verification-requests` | Send a skill verification request to a mentor. |
+| GET | `/api/skill-verification-requests/sent` | Get skill verification requests sent by the current user. |
+| GET | `/api/skill-verification-requests/received` | Get skill verification requests received by the current user. |
+| PATCH | `/api/skill-verification-requests/{id}` | Accept, reject, or cancel a skill verification request. |
+
+#### Rules
+- A user cannot request verification from themselves.
+- The requester and mentor must have at least one shared learning session.
+- Only one pending verification request can exist for the same requester, mentor, and skill.
+- The requester can cancel a pending request.
+- The mentor can accept or reject a pending request.
+- Accepting a request automatically assigns a score of `5`.
+- Notifications are created when a request is received, accepted, rejected, or cancelled.
