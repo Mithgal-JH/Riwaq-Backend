@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Team3.Backend.Data;
@@ -11,9 +12,11 @@ using Team3.Backend.Data;
 namespace Team3.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919205153_PreventDuplicateConnections")]
+    partial class PreventDuplicateConnections
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -247,106 +250,6 @@ namespace Team3.Backend.Migrations
                     b.ToTable("ConnectionRequests");
                 });
 
-            modelBuilder.Entity("Team3.Backend.Models.ContentAnalysis", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AnalysisState")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ClassificationStatus")
-                        .HasColumnType("text");
-
-                    b.Property<int>("ContentVersion")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("DifficultyConfidence")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
-                    b.Property<string>("DifficultyLevel")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DifficultyModel")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("EducationalContentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FailureCode")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("NeedsReview")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PreprocessingVersion")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PrimaryTopicsJson")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<DateTimeOffset?>("ProcessedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ProcessingStatus")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RecommendationSignal")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RequestId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("RiskCategoriesJson")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<decimal?>("SafetyConfidence")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
-                    b.Property<string>("SafetyModel")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("SafetyReviewRequired")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SafetyStatus")
-                        .HasColumnType("text");
-
-                    b.Property<decimal?>("SafetyThreshold")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("numeric(18,8)");
-
-                    b.Property<string>("SecondaryTopicsJson")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.Property<int>("TopicCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("TopicModel")
-                        .HasColumnType("text");
-
-                    b.Property<string>("TopicReasonCode")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RequestId")
-                        .IsUnique();
-
-                    b.HasIndex("EducationalContentId", "ContentVersion")
-                        .IsUnique();
-
-                    b.ToTable("ContentAnalyses");
-                });
-
             modelBuilder.Entity("Team3.Backend.Models.Conversation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -385,11 +288,6 @@ namespace Team3.Backend.Migrations
 
                     b.Property<string>("ContentUrl")
                         .HasColumnType("text");
-
-                    b.Property<int>("ContentVersion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -666,9 +564,6 @@ namespace Team3.Backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("RelatedEntityId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
@@ -678,10 +573,7 @@ namespace Team3.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "IsRead", "CreatedAt");
-
-                    b.HasIndex("UserId", "Type", "RelatedEntityId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
                 });
@@ -1252,17 +1144,6 @@ namespace Team3.Backend.Migrations
                     b.Navigation("SenderUser");
                 });
 
-            modelBuilder.Entity("Team3.Backend.Models.ContentAnalysis", b =>
-                {
-                    b.HasOne("Team3.Backend.Models.EducationalContent", "EducationalContent")
-                        .WithMany("ContentAnalyses")
-                        .HasForeignKey("EducationalContentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EducationalContent");
-                });
-
             modelBuilder.Entity("Team3.Backend.Models.Conversation", b =>
                 {
                     b.HasOne("Team3.Backend.Models.Connection", "Connection")
@@ -1687,8 +1568,6 @@ namespace Team3.Backend.Migrations
             modelBuilder.Entity("Team3.Backend.Models.EducationalContent", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("ContentAnalyses");
 
                     b.Navigation("EducationalContentInterests");
 

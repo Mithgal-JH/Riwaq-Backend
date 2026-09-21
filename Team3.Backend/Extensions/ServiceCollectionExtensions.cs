@@ -18,6 +18,10 @@ using Team3.Backend.Features.LearningSessions.Interfaces;
 using Team3.Backend.Features.Progress;
 using Team3.Backend.Features.Progress.Interfaces;
 using Team3.Backend.Features.Points;
+using Team3.Backend.Features.Ratings;
+using Team3.Backend.Features.Ratings.Interfaces;
+using Team3.Backend.Features.SkillVerificationRequests;
+using Team3.Backend.Features.SkillVerificationRequests.Interfaces;
 using Team3.Backend.Features.Skills;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
@@ -25,6 +29,10 @@ using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
 using Team3.Backend.Features.Comments;
 using Team3.Backend.Features.Comments.Interfaces;
+using Team3.Backend.Features.Connections;
+using Team3.Backend.Features.Connections.Interfaces;
+using Team3.Backend.Features.Conversations;
+using Team3.Backend.Features.Conversations.Interfaces;
 using Team3.Backend.Features.Notifications;
 using Team3.Backend.Features.Notifications.Interfaces;
 using Team3.Backend.Features.AI;
@@ -103,8 +111,6 @@ public static class ServiceCollectionExtensions
             IEducationalContentInteractionsService,
             EducationalContentInteractionsService>();
 
-
-
         // Register Comment services.
         services.AddScoped<
             ICommentsRepository,
@@ -121,6 +127,28 @@ public static class ServiceCollectionExtensions
         services.AddScoped<
             IConnectionRequestsService,
             ConnectionRequestsService>();
+
+        services.AddScoped<
+            IConnectionsRepository,
+            ConnectionsRepository>();
+
+        services.AddScoped<
+            IConnectionsService,
+            ConnectionsService>();
+
+        services.AddScoped<
+            IConversationsRepository,
+            ConversationsRepository>();
+
+        services.AddScoped<
+            IConversationsService,
+            ConversationsService>();
+
+        services.AddScoped<IRatingsRepository, RatingsRepository>();
+        services.AddScoped<IRatingsService, RatingsService>();
+
+        services.AddScoped<ISkillVerificationRequestsRepository, SkillVerificationRequestsRepository>();
+        services.AddScoped<ISkillVerificationRequestsService, SkillVerificationRequestsService>();
 
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
@@ -151,7 +179,6 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
     private static void ConfigureAiHttpClient(
         IServiceProvider serviceProvider,
         HttpClient httpClient)
