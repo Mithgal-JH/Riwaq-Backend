@@ -6,6 +6,11 @@ public interface IUsersRepository
 {
     Task<User?> GetByIdWithProfileAsync(Guid id);
 
+    Task<User?> GetByIdForAiSyncAsync(Guid id);
+
+    Task<List<User>> GetPublicProfilesByIdsAsync(
+        IReadOnlyCollection<Guid> userIds);
+
     Task<Skill?> GetSkillByIdAsync(Guid skillId);
 
     void AddProfile(Profile profile);

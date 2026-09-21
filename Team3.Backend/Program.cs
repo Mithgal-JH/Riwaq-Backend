@@ -162,6 +162,7 @@ builder.Services.AddSwaggerGen(options =>
             "EducationalContent" => "Educational Content",
             "Comments" => "Comments",
             "ConnectionRequests" => "Connection Requests",
+            "Recommendations" => "Recommendations",
             _ => controller ?? "Other"
         }];
     });

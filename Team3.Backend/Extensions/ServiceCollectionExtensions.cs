@@ -29,6 +29,8 @@ using Team3.Backend.Features.Notifications;
 using Team3.Backend.Features.Notifications.Interfaces;
 using Team3.Backend.Features.AI;
 using Team3.Backend.Features.AI.Interfaces;
+using Team3.Backend.Features.Recommendations;
+using Team3.Backend.Features.Recommendations.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace Team3.Backend.Extensions;
@@ -123,6 +125,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         services.AddSingleton<IUserIdProvider, LocalUserIdProvider>();
+        services.AddScoped<IProfileSyncService, ProfileSyncService>();
+        services.AddScoped<IPersonRecommendationService, PersonRecommendationService>();
 
         services.AddOptions<AiOptions>()
             .BindConfiguration("AI");
@@ -132,6 +136,10 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IPostRecommendationClient, PostRecommendationClient>(
             ConfigureAiHttpClient);
         services.AddHttpClient<IPostUpsertedClient, PostUpsertedClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IProfileSyncClient, ProfileSyncClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IPersonRecommendationClient, PersonRecommendationClient>(
             ConfigureAiHttpClient);
 
         return services;

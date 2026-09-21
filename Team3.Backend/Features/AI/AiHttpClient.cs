@@ -28,6 +28,113 @@ public abstract class AiHttpClient
 
     protected AiOptions Options { get; }
 
+    protected async Task<TResponse> GetAsync<TResponse>(
+        string path,
+        string operationId,
+        CancellationToken cancellationToken)
+    {
+        EnsureConfigured();
+
+        for (var attempt = 1; attempt <= MaxAttempts; attempt++)
+        {
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await _httpClient.SendAsync(
+                    httpRequest,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException) when (
+                !cancellationToken.IsCancellationRequested && attempt < MaxAttempts)
+            {
+                LogRetry(operationId, attempt, "request timeout");
+                await DelayBeforeRetryAsync(attempt, cancellationToken);
+                continue;
+            }
+            catch (HttpRequestException exception) when (attempt < MaxAttempts)
+            {
+                LogRetry(operationId, attempt, exception.Message);
+                await DelayBeforeRetryAsync(attempt, cancellationToken);
+                continue;
+            }
+            catch (OperationCanceledException) when (
+                !cancellationToken.IsCancellationRequested)
+            {
+                throw CreateUnavailableException(operationId, "request timeout");
+            }
+            catch (HttpRequestException exception)
+            {
+                throw CreateUnavailableException(
+                    operationId,
+                    "request failed",
+                    exception);
+            }
+
+            using (response)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync(
+                    cancellationToken);
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    throw CreateHttpException(
+                        operationId,
+                        response.StatusCode,
+                        responseBody);
+                }
+
+                if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    throw CreateHttpException(
+                        operationId,
+                        response.StatusCode,
+                        responseBody);
+                }
+
+                if (response.StatusCode == HttpStatusCode.InternalServerError
+                    && attempt < MaxAttempts)
+                {
+                    LogRetry(operationId, attempt, "HTTP 500");
+                    await DelayBeforeRetryAsync(attempt, cancellationToken);
+                    continue;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw CreateHttpException(
+                        operationId,
+                        response.StatusCode,
+                        responseBody);
+                }
+
+                try
+                {
+                    return JsonSerializer.Deserialize<TResponse>(
+                        responseBody,
+                        SerializerOptions)
+                        ?? throw new AiServiceException(
+                            "AI service returned an empty response.",
+                            operationId,
+                            response.StatusCode,
+                            responseBody);
+                }
+                catch (JsonException exception)
+                {
+                    throw new AiServiceException(
+                        "AI service returned an invalid response.",
+                        operationId,
+                        response.StatusCode,
+                        responseBody,
+                        exception);
+                }
+            }
+        }
+
+        throw CreateUnavailableException(operationId, "request failed after retries");
+    }
+
     protected async Task<TResponse> PostAsync<TRequest, TResponse>(
         string path,
         TRequest request,
