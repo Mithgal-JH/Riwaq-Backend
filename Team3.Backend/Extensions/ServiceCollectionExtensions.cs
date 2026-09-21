@@ -27,6 +27,9 @@ using Team3.Backend.Features.Comments;
 using Team3.Backend.Features.Comments.Interfaces;
 using Team3.Backend.Features.Notifications;
 using Team3.Backend.Features.Notifications.Interfaces;
+using Team3.Backend.Features.AI;
+using Team3.Backend.Features.AI.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace Team3.Backend.Extensions;
 
@@ -121,6 +124,33 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         services.AddSingleton<IUserIdProvider, LocalUserIdProvider>();
 
+        services.AddOptions<AiOptions>()
+            .BindConfiguration("AI");
+
+        services.AddHttpClient<IContentAnalysisClient, ContentAnalysisClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IPostRecommendationClient, PostRecommendationClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IPostUpsertedClient, PostUpsertedClient>(
+            ConfigureAiHttpClient);
+
         return services;
+    }
+
+    private static void ConfigureAiHttpClient(
+        IServiceProvider serviceProvider,
+        HttpClient httpClient)
+    {
+        var options = serviceProvider
+            .GetRequiredService<IOptions<AiOptions>>()
+            .Value;
+
+        if (Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var baseUrl))
+        {
+            httpClient.BaseAddress = baseUrl;
+        }
+
+        httpClient.Timeout = TimeSpan.FromSeconds(
+            options.TimeoutSeconds > 0 ? options.TimeoutSeconds : 30);
     }
 }
