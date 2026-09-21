@@ -14,15 +14,18 @@ public sealed class ContentAnalysisService : IContentAnalysisService
     private readonly IContentAnalysisClient _client;
     private readonly IContentAnalysisRepository _repository;
     private readonly ILogger<ContentAnalysisService> _logger;
+    private readonly IPostUpsertedClient? _postUpsertedClient;
 
     public ContentAnalysisService(
         IContentAnalysisClient client,
         IContentAnalysisRepository repository,
-        ILogger<ContentAnalysisService> logger)
+        ILogger<ContentAnalysisService> logger,
+        IPostUpsertedClient? postUpsertedClient = null)
     {
         _client = client;
         _repository = repository;
         _logger = logger;
+        _postUpsertedClient = postUpsertedClient;
     }
 
     public async Task AnalyzeAsync(
@@ -86,6 +89,10 @@ public sealed class ContentAnalysisService : IContentAnalysisService
                     "Ignoring content analysis response because content {ContentId} moved past version {Version}.",
                     content.Id,
                     content.ContentVersion);
+            }
+            else
+            {
+                await TryUpsertPostAsync(content, analysis, cancellationToken);
             }
         }
         catch (OperationCanceledException) when (
@@ -224,5 +231,52 @@ public sealed class ContentAnalysisService : IContentAnalysisService
         analysis.SafetyModel = response.ModelVersions.SafetyModel;
         analysis.PreprocessingVersion = response.PreprocessingVersion;
         analysis.FailureCode = null;
+    }
+
+    private async Task TryUpsertPostAsync(
+        EducationalContentModel content,
+        ContentAnalysis analysis,
+        CancellationToken cancellationToken)
+    {
+        if (_postUpsertedClient is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var primaryTopics = JsonSerializer.Deserialize<List<TopicResult>>(
+                    analysis.PrimaryTopicsJson)
+                ?? [];
+
+            await _postUpsertedClient.UpsertAsync(new PostUpsertedRequest
+            {
+                PostId = content.Id.ToString(),
+                CreatorId = content.UserId.ToString(),
+                Title = content.Title,
+                Body = BuildText(content),
+                CreatedAt = new DateTimeOffset(content.CreatedAt),
+                PrimaryTopic = primaryTopics.FirstOrDefault()?.Topic ?? string.Empty,
+                Topics = new PostTopics { PrimaryTopics = primaryTopics },
+                Difficulty = new DifficultyResult
+                {
+                    Level = analysis.DifficultyLevel ?? string.Empty,
+                    Confidence = analysis.DifficultyConfidence ?? 0
+                },
+                Safety = new PostSafety
+                {
+                    Status = analysis.SafetyStatus ?? string.Empty,
+                    RecommendationSignal = analysis.RecommendationSignal ?? string.Empty
+                }
+            }, cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(
+                exception,
+                "Post indexing failed after content analysis for content {ContentId}, version {Version}.",
+                content.Id,
+                content.ContentVersion);
+        }
     }
 }

@@ -129,6 +129,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IContentAnalysisService, ContentAnalysisService>();
         services.AddScoped<IProfileSyncService, ProfileSyncService>();
         services.AddScoped<IPersonRecommendationService, PersonRecommendationService>();
+        services.AddScoped<IPostRecommendationRepository, PostRecommendationRepository>();
+        services.AddScoped<IPostRecommendationService, PostRecommendationService>();
 
         services.AddOptions<AiOptions>()
             .BindConfiguration("AI");
@@ -136,7 +138,10 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IContentAnalysisClient, ContentAnalysisClient>(
             ConfigureAiHttpClient);
         services.AddHttpClient<IPostRecommendationClient, PostRecommendationClient>(
-            ConfigureAiHttpClient);
+            (serviceProvider, httpClient) => ConfigureAiHttpClient(
+                serviceProvider,
+                httpClient,
+                TimeSpan.FromMilliseconds(300)));
         services.AddHttpClient<IPostUpsertedClient, PostUpsertedClient>(
             ConfigureAiHttpClient);
         services.AddHttpClient<IProfileSyncClient, ProfileSyncClient>(
@@ -151,6 +156,14 @@ public static class ServiceCollectionExtensions
         IServiceProvider serviceProvider,
         HttpClient httpClient)
     {
+        ConfigureAiHttpClient(serviceProvider, httpClient, null);
+    }
+
+    private static void ConfigureAiHttpClient(
+        IServiceProvider serviceProvider,
+        HttpClient httpClient,
+        TimeSpan? timeout = null)
+    {
         var options = serviceProvider
             .GetRequiredService<IOptions<AiOptions>>()
             .Value;
@@ -160,7 +173,7 @@ public static class ServiceCollectionExtensions
             httpClient.BaseAddress = baseUrl;
         }
 
-        httpClient.Timeout = TimeSpan.FromSeconds(
+        httpClient.Timeout = timeout ?? TimeSpan.FromSeconds(
             options.TimeoutSeconds > 0 ? options.TimeoutSeconds : 30);
     }
 }

@@ -64,6 +64,44 @@ public sealed class ContentAnalysisIntegrationTests
     }
 
     [Fact]
+    public async Task AnalysisService_ShouldUpsertPostOnlyAfterValidAnalysis()
+    {
+        await using var context = CreateContext();
+        var content = Content(Guid.NewGuid(), 1, "Build APIs", "Use C#.");
+        context.EducationalContents.Add(content);
+        await context.SaveChangesAsync();
+        var client = new Mock<IContentAnalysisClient>();
+        var upsert = new Mock<IPostUpsertedClient>();
+        client.Setup(item => item.AnalyzeAsync(
+                It.IsAny<ContentAnalysisRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ContentAnalysisRequest request, CancellationToken _) =>
+                Response(content, request.RequestId));
+        upsert.Setup(item => item.UpsertAsync(
+                It.IsAny<PostUpsertedRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PostUpsertedResponse());
+        var service = new ContentAnalysisService(
+            client.Object,
+            new ContentAnalysisRepository(context),
+            NullLogger<ContentAnalysisService>.Instance,
+            upsert.Object);
+
+        await service.AnalyzeAsync(content);
+
+        upsert.Verify(item => item.UpsertAsync(
+            It.Is<PostUpsertedRequest>(request =>
+                request.PostId == content.Id.ToString()
+                && request.CreatorId == content.UserId.ToString()
+                && request.Body == "Build APIs\n\nUse C#."
+                && request.PrimaryTopic == "AI_DATA"
+                && request.Difficulty.Level == "INTERMEDIATE"
+                && request.Safety.Status == "SAFE"
+                && request.Safety.RecommendationSignal == "ALLOW"),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
     public async Task AnalysisService_ShouldBuildTitleAndDescriptionTextAndPersistRequestId()
     {
         await using var context = CreateContext();
