@@ -192,22 +192,43 @@ public sealed class PostRecommendationIntegrationTests
     }
 
     [Fact]
-    public async Task Service_ShouldRejectMissingLearningDirection()
+    public async Task Service_ShouldSupportColdStartWithoutLearningDirection()
     {
         var userId = Guid.NewGuid();
         var users = new Mock<IUsersRepository>();
+        var repository = new Mock<IPostRecommendationRepository>();
+        var client = new Mock<IPostRecommendationClient>();
         users.Setup(item => item.GetByIdForAiSyncAsync(userId))
             .ReturnsAsync(ServiceTestData.User(userId));
+        repository.Setup(item => item.GetEligibleCandidateIdsAsync(100))
+            .ReturnsAsync([]);
+        repository.Setup(item => item.GetRecentInteractionsAsync(userId))
+            .ReturnsAsync([]);
+        repository.Setup(item => item.GetByIdsAsync(
+                It.IsAny<IReadOnlyCollection<Guid>>()))
+            .ReturnsAsync([]);
+        client.Setup(item => item.RecommendPostsAsync(
+                It.IsAny<PostRecommendationRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PostRecommendationResponse
+            {
+                RequestId = "req_cold_start"
+            });
         var service = new PostRecommendationService(
             users.Object,
-            Mock.Of<IPostRecommendationRepository>(),
-            Mock.Of<IPostRecommendationClient>(),
+            repository.Object,
+            client.Object,
             NullLogger<PostRecommendationService>.Instance);
 
-        var action = () => service.RecommendAsync(userId);
+        var result = await service.RecommendAsync(userId, requestId: "req_cold_start");
 
-        await action.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("A learning direction is required for post recommendations.");
+        result.Should().NotBeNull();
+        client.Verify(item => item.RecommendPostsAsync(
+            It.Is<PostRecommendationRequest>(request =>
+                request.LearningDirection == null
+                && request.UserId == userId.ToString()
+                && request.RecentInteractions == null),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private static PostRecommendationItem Recommendation(Guid id, int rank)

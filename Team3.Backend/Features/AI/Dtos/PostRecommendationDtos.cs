@@ -8,7 +8,7 @@ public sealed class PostRecommendationRequest
 
     public List<string> DeclaredTopics { get; set; } = [];
 
-    public string LearningDirection { get; set; } = string.Empty;
+    public string? LearningDirection { get; set; }
 
     public List<string> EligibleCandidateIds { get; set; } = [];
 
