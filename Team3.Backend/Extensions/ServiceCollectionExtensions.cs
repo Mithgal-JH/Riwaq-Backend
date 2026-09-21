@@ -35,6 +35,11 @@ using Team3.Backend.Features.Conversations;
 using Team3.Backend.Features.Conversations.Interfaces;
 using Team3.Backend.Features.Notifications;
 using Team3.Backend.Features.Notifications.Interfaces;
+using Team3.Backend.Features.AI;
+using Team3.Backend.Features.AI.Interfaces;
+using Team3.Backend.Features.Recommendations;
+using Team3.Backend.Features.Recommendations.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace Team3.Backend.Extensions;
 
@@ -148,7 +153,54 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         services.AddSingleton<IUserIdProvider, LocalUserIdProvider>();
+        services.AddScoped<IContentAnalysisRepository, ContentAnalysisRepository>();
+        services.AddScoped<IContentAnalysisService, ContentAnalysisService>();
+        services.AddScoped<IProfileSyncService, ProfileSyncService>();
+        services.AddScoped<IPersonRecommendationService, PersonRecommendationService>();
+        services.AddScoped<IPostRecommendationRepository, PostRecommendationRepository>();
+        services.AddScoped<IPostRecommendationService, PostRecommendationService>();
+
+        services.AddOptions<AiOptions>()
+            .BindConfiguration("AI");
+
+        services.AddHttpClient<IContentAnalysisClient, ContentAnalysisClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IPostRecommendationClient, PostRecommendationClient>(
+            (serviceProvider, httpClient) => ConfigureAiHttpClient(
+                serviceProvider,
+                httpClient,
+                TimeSpan.FromMilliseconds(300)));
+        services.AddHttpClient<IPostUpsertedClient, PostUpsertedClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IProfileSyncClient, ProfileSyncClient>(
+            ConfigureAiHttpClient);
+        services.AddHttpClient<IPersonRecommendationClient, PersonRecommendationClient>(
+            ConfigureAiHttpClient);
 
         return services;
+    }
+    private static void ConfigureAiHttpClient(
+        IServiceProvider serviceProvider,
+        HttpClient httpClient)
+    {
+        ConfigureAiHttpClient(serviceProvider, httpClient, null);
+    }
+
+    private static void ConfigureAiHttpClient(
+        IServiceProvider serviceProvider,
+        HttpClient httpClient,
+        TimeSpan? timeout = null)
+    {
+        var options = serviceProvider
+            .GetRequiredService<IOptions<AiOptions>>()
+            .Value;
+
+        if (Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var baseUrl))
+        {
+            httpClient.BaseAddress = baseUrl;
+        }
+
+        httpClient.Timeout = timeout ?? TimeSpan.FromSeconds(
+            options.TimeoutSeconds > 0 ? options.TimeoutSeconds : 30);
     }
 }

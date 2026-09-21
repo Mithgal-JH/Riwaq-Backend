@@ -1,3 +1,4 @@
+using Team3.Backend.Features.AI.Interfaces;
 using Team3.Backend.Features.Skills.Dtos;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Models;
@@ -7,10 +8,14 @@ namespace Team3.Backend.Features.Skills;
 public class SkillsService : ISkillsService
 {
     private readonly ISkillsRepository _skillsRepository;
+    private readonly IProfileSyncService? _profileSyncService;
 
-    public SkillsService(ISkillsRepository skillsRepository)
+    public SkillsService(
+        ISkillsRepository skillsRepository,
+        IProfileSyncService? profileSyncService = null)
     {
         _skillsRepository = skillsRepository;
+        _profileSyncService = profileSyncService;
     }
 
     public async Task<IReadOnlyList<SkillResponse>> GetAllAsync()
@@ -62,6 +67,7 @@ public class SkillsService : ISkillsService
         });
 
         await _skillsRepository.SaveChangesAsync();
+        await SyncProfileAsync(userId);
         return MapToResponse(skill);
     }
 
@@ -81,6 +87,7 @@ public class SkillsService : ISkillsService
         }
 
         await _skillsRepository.SaveChangesAsync();
+        await SyncProfileAsync(userId);
         return true;
     }
 
@@ -100,5 +107,13 @@ public class SkillsService : ISkillsService
             Name = skill.Name,
             Description = skill.Description
         };
+    }
+
+    private async Task SyncProfileAsync(Guid userId)
+    {
+        if (_profileSyncService is not null)
+        {
+            await _profileSyncService.UpsertProfileAsync(userId);
+        }
     }
 }

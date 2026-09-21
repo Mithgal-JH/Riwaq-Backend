@@ -1,3 +1,4 @@
+using Team3.Backend.Features.AI.Interfaces;
 using Team3.Backend.Features.Users.Dtos;
 using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
@@ -7,10 +8,14 @@ namespace Team3.Backend.Features.Users;
 public class UsersService : IUsersService
 {
     private readonly IUsersRepository _usersRepository;
+    private readonly IProfileSyncService? _profileSyncService;
 
-    public UsersService(IUsersRepository usersRepository)
+    public UsersService(
+        IUsersRepository usersRepository,
+        IProfileSyncService? profileSyncService = null)
     {
         _usersRepository = usersRepository;
+        _profileSyncService = profileSyncService;
     }
 
     public async Task<UserProfileResponse?> GetMyProfileAsync(
@@ -65,6 +70,7 @@ public class UsersService : IUsersService
         }
 
         await _usersRepository.SaveChangesAsync();
+        await SyncProfileAsync(userId);
 
         return MapToUserProfileResponse(user);
     }
@@ -95,6 +101,7 @@ public class UsersService : IUsersService
 
         user.LearningDirectionId = skill.Id;
         await _usersRepository.SaveChangesAsync();
+        await SyncProfileAsync(userId);
 
         return MapToUserProfileResponse(user);
     }
@@ -135,5 +142,13 @@ public class UsersService : IUsersService
             Bio = user.Profile?.Bio,
             University = user.Profile?.University
         };
+    }
+
+    private async Task SyncProfileAsync(Guid userId)
+    {
+        if (_profileSyncService is not null)
+        {
+            await _profileSyncService.UpsertProfileAsync(userId);
+        }
     }
 }
