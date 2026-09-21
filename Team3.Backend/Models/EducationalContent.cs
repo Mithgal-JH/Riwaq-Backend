@@ -18,6 +18,8 @@ public class EducationalContent
 
     public DateTime UpdatedAt { get; set; }
 
+    public int ContentVersion { get; set; } = 1;
+
     public User User { get; set; } = null!;
 
     public ICollection<Like> Likes { get; set; } = new List<Like>();
@@ -38,4 +40,7 @@ public class EducationalContent
 
     public ICollection<EducationalContentLearningDirection> EducationalContentLearningDirections { get; set; } =
         new List<EducationalContentLearningDirection>();
+
+    public ICollection<ContentAnalysis> ContentAnalyses { get; set; } =
+        new List<ContentAnalysis>();
 }

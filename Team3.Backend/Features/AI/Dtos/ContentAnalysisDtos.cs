@@ -42,6 +42,8 @@ public sealed class ContentTopics
 {
     public string ClassificationStatus { get; set; } = string.Empty;
 
+    public string? ReasonCode { get; set; }
+
     public List<TopicResult> PrimaryTopics { get; set; } = [];
 
     public List<TopicResult> SecondaryTopics { get; set; } = [];
@@ -66,6 +68,10 @@ public sealed class DifficultyResult
 public sealed class SafetyResult
 {
     public string Status { get; set; } = string.Empty;
+
+    public decimal? Confidence { get; set; }
+
+    public decimal? Threshold { get; set; }
 
     public List<string> RiskCategories { get; set; } = [];
 

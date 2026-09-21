@@ -125,6 +125,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<INotificationRealtimePublisher, SignalRNotificationRealtimePublisher>();
         services.AddSingleton<IUserIdProvider, LocalUserIdProvider>();
+        services.AddScoped<IContentAnalysisRepository, ContentAnalysisRepository>();
+        services.AddScoped<IContentAnalysisService, ContentAnalysisService>();
         services.AddScoped<IProfileSyncService, ProfileSyncService>();
         services.AddScoped<IPersonRecommendationService, PersonRecommendationService>();
 

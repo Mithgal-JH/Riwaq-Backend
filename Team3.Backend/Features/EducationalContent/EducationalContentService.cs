@@ -1,3 +1,4 @@
+using Team3.Backend.Features.AI.Interfaces;
 using Team3.Backend.Features.EducationalContent.Dtos;
 using Team3.Backend.Features.EducationalContent.Interfaces;
 using Team3.Backend.Models;
@@ -8,11 +9,14 @@ namespace Team3.Backend.Features.EducationalContent;
 public class EducationalContentService : IEducationalContentService
 {
     private readonly IEducationalContentRepository _educationalContentRepository;
+    private readonly IContentAnalysisService? _contentAnalysisService;
 
     public EducationalContentService(
-        IEducationalContentRepository educationalContentRepository)
+        IEducationalContentRepository educationalContentRepository,
+        IContentAnalysisService? contentAnalysisService = null)
     {
         _educationalContentRepository = educationalContentRepository;
+        _contentAnalysisService = contentAnalysisService;
     }
 
     public async Task<IReadOnlyList<EducationalContentResponse>> GetAllAsync()
@@ -53,11 +57,13 @@ public class EducationalContentService : IEducationalContentService
             ContentType = request.ContentType.Trim(),
             ContentUrl = request.ContentUrl,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            ContentVersion = 1
         };
 
         _educationalContentRepository.Add(content);
         await _educationalContentRepository.SaveChangesAsync();
+        await AnalyzeAsync(content);
 
         return MapToResponse(content);
     }
@@ -81,31 +87,48 @@ public class EducationalContentService : IEducationalContentService
             throw new KeyNotFoundException("Educational content not found.");
         }
 
+        var contentChanged = false;
+
         if (request.Title is not null)
         {
             ValidateTitle(request.Title);
-            content.Title = request.Title.Trim();
+            var title = request.Title.Trim();
+            contentChanged |= content.Title != title;
+            content.Title = title;
         }
 
         if (request.Description is not null)
         {
+            contentChanged |= content.Description != request.Description;
             content.Description = request.Description;
         }
 
         if (request.ContentType is not null)
         {
             ValidateContentType(request.ContentType);
-            content.ContentType = request.ContentType.Trim();
+            var contentType = request.ContentType.Trim();
+            contentChanged |= content.ContentType != contentType;
+            content.ContentType = contentType;
         }
 
         if (request.ContentUrl is not null)
         {
+            contentChanged |= content.ContentUrl != request.ContentUrl;
             content.ContentUrl = request.ContentUrl;
+        }
+
+        if (contentChanged)
+        {
+            content.ContentVersion++;
         }
 
         content.UpdatedAt = DateTime.UtcNow;
 
         await _educationalContentRepository.SaveChangesAsync();
+        if (contentChanged)
+        {
+            await AnalyzeAsync(content);
+        }
 
         return MapToResponse(content);
     }
@@ -193,5 +216,13 @@ public class EducationalContentService : IEducationalContentService
             CreatedAt = content.CreatedAt,
             UpdatedAt = content.UpdatedAt
         };
+    }
+
+    private async Task AnalyzeAsync(EducationalContentModel content)
+    {
+        if (_contentAnalysisService is not null)
+        {
+            await _contentAnalysisService.AnalyzeAsync(content);
+        }
     }
 }

@@ -17,6 +17,7 @@ public class AppDbContext
     public DbSet<LearningDirection> LearningDirections => Set<LearningDirection>();
     public DbSet<Progress> Progresses => Set<Progress>();
     public DbSet<EducationalContent> EducationalContents => Set<EducationalContent>();
+    public DbSet<ContentAnalysis> ContentAnalyses => Set<ContentAnalysis>();
     public DbSet<Like> Likes => Set<Like>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Share> Shares => Set<Share>();
@@ -182,9 +183,63 @@ public class AppDbContext
         {
             entity.HasKey(x => x.Id);
 
+            entity.Property(x => x.ContentVersion)
+                .HasDefaultValue(1)
+                .IsRequired();
+
             entity.HasOne(x => x.User)
                 .WithMany(x => x.EducationalContents)
                 .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ContentAnalysis>(entity =>
+        {
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.RequestId)
+                .IsRequired();
+
+            entity.Property(x => x.AnalysisState)
+                .IsRequired();
+
+            entity.Property(x => x.PrimaryTopicsJson)
+                .HasColumnType("jsonb")
+                .IsRequired();
+
+            entity.Property(x => x.SecondaryTopicsJson)
+                .HasColumnType("jsonb")
+                .IsRequired();
+
+            entity.Property(x => x.RiskCategoriesJson)
+                .HasColumnType("jsonb")
+                .IsRequired();
+
+            entity.Property(x => x.DifficultyConfidence)
+                .HasPrecision(18, 8);
+
+            entity.Property(x => x.SafetyConfidence)
+                .HasPrecision(18, 8);
+
+            entity.Property(x => x.SafetyThreshold)
+                .HasPrecision(18, 8);
+
+            entity.Property(x => x.SafetyReviewRequired)
+                .IsRequired();
+
+            entity.HasIndex(x => new
+            {
+                x.EducationalContentId,
+                x.ContentVersion
+            })
+            .IsUnique();
+
+            entity.HasIndex(x => x.RequestId)
+                .IsUnique();
+
+            entity.HasOne(x => x.EducationalContent)
+                .WithMany(x => x.ContentAnalyses)
+                .HasForeignKey(x => x.EducationalContentId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
