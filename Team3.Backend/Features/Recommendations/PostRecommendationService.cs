@@ -51,12 +51,6 @@ public sealed class PostRecommendationService : IPostRecommendationService
 
         var learningDirection = user.SelectedSkill?.Name;
 
-        if (string.IsNullOrWhiteSpace(learningDirection))
-        {
-            throw new ArgumentException(
-                "A learning direction is required for post recommendations.");
-        }
-
         var candidateIds = await _repository
             .GetEligibleCandidateIdsAsync(MaximumCandidates);
         candidateIds = candidateIds
