@@ -1,0 +1,424 @@
+{
+  "info": {
+    "_postman_id": "5f5cc0d5-4b62-4d9f-9b4d-9f8a1c4b6d31",
+    "name": "Riwaq Backend",
+    "description": "Current Riwaq Backend API collection. Protected requests use Authorization: Bearer {{firebaseToken}} with a validated Firebase ID token. Replace placeholder IDs with values returned by the API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{firebaseToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5116" },
+    { "key": "firebaseToken", "value": "", "type": "string" },
+    { "key": "userId", "value": "00000000-0000-0000-0000-000000000001" },
+    { "key": "skillId", "value": "00000000-0000-0000-0000-000000000002" },
+    { "key": "interestId", "value": "00000000-0000-0000-0000-000000000003" },
+    {
+      "key": "learningDirectionId",
+      "value": "00000000-0000-0000-0000-000000000004"
+    },
+    { "key": "experienceId", "value": "00000000-0000-0000-0000-000000000005" },
+    { "key": "progressId", "value": "00000000-0000-0000-0000-000000000006" },
+    { "key": "idempotencyKey", "value": "purchase-retry-example-001" },
+    { "key": "secondIdempotencyKey", "value": "purchase-intent-example-002" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Firebase Authentication uses a Firebase ID token. Put the token in the collection variable firebaseToken; protected requests automatically send Authorization: Bearer {{firebaseToken}}. The login request verifies an ID token and provisions or reuses the local user.",
+      "item": [
+        {
+          "name": "Firebase Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"{{firebaseToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/auth/firebase-login",
+            "description": "Anonymous endpoint. Send a real Firebase ID token in idToken. Success example: {\"userId\":\"00000000-0000-0000-0000-000000000001\",\"firebaseUid\":\"firebase-uid\",\"points\":50,\"learningDirectionId\":null,\"isNewUser\":true}. Invalid or expired tokens return 401."
+          },
+          "response": [],
+          "auth": { "type": "noauth" }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Authenticated user profile operations. The backend derives the local user from the validated token; no user ID is accepted for the current-user operations.",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Returns the authenticated local user's profile. Success example: {\"userId\":\"...\",\"firebaseUid\":\"...\",\"points\":50,\"learningDirectionId\":null,\"firstName\":null,\"lastName\":null,\"bio\":null,\"university\":null}."
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace\",\n  \"bio\": \"Backend developer\",\n  \"university\": \"Analytical University\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/me",
+            "description": "Updates only the authenticated user's profile. Success example: {\"userId\":\"...\",\"firebaseUid\":\"...\",\"points\":50,\"learningDirectionId\":null,\"firstName\":\"Ada\",\"lastName\":\"Lovelace\",\"bio\":\"Backend developer\",\"university\":\"Analytical University\"}."
+          }
+        },
+        {
+          "name": "Select My Learning Direction Skill",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skillId\": \"{{skillId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/me/learning-direction",
+            "description": "Assigns an existing Skill as the authenticated user's learning direction. Success example: {\"userId\":\"...\",\"learningDirectionId\":\"...\",\"points\":50}. Invalid skillId returns 404; an empty GUID returns 400."
+          }
+        },
+        {
+          "name": "Get Public User Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/{{userId}}",
+            "description": "Anonymous public profile lookup. Success example: {\"userId\":\"...\",\"points\":50,\"learningDirectionId\":null,\"learningDirectionName\":null,\"firstName\":\"Ada\",\"lastName\":\"Lovelace\",\"bio\":null,\"university\":null}. Unknown users return 404."
+          },
+          "auth": { "type": "noauth" }
+        }
+      ]
+    },
+    {
+      "name": "Skills",
+      "description": "Skill catalog is public; modifying or reading the authenticated user's skill associations requires Firebase Bearer authentication.",
+      "item": [
+        {
+          "name": "List Skills",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/skills",
+            "description": "Returns the skill catalog. Success example: [{\"id\":\"...\",\"name\":\"C#\",\"description\":\".NET\"}]."
+          },
+          "auth": { "type": "noauth" }
+        },
+        {
+          "name": "Get Skill",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/skills/{{skillId}}",
+            "description": "Returns one skill. Success example: {\"id\":\"...\",\"name\":\"C#\",\"description\":\".NET\"}. Unknown IDs return 404."
+          },
+          "auth": { "type": "noauth" }
+        },
+        {
+          "name": "List My Skills",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profiles/me/skills",
+            "description": "Returns only the authenticated user's skills. Success example: [{\"id\":\"...\",\"name\":\"C#\",\"description\":\".NET\"}]."
+          }
+        },
+        {
+          "name": "Add Skill to My Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/profiles/me/skills/{{skillId}}",
+            "description": "Associates an existing skill with the authenticated user's profile. Success example: {\"id\":\"...\",\"name\":\"C#\",\"description\":\".NET\"}. The skill ID is a path parameter, not a client-supplied user identity."
+          }
+        },
+        {
+          "name": "Remove Skill from My Profile",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/profiles/me/skills/{{skillId}}",
+            "description": "Removes the skill association from the authenticated user's profile. Success returns 204."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interests",
+      "description": "Interest catalog is public; profile associations are scoped to the authenticated user.",
+      "item": [
+        {
+          "name": "List Interests",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/interests",
+            "description": "Returns the interest catalog. Success example: [{\"id\":\"...\",\"name\":\"Science\",\"description\":null}]."
+          },
+          "auth": { "type": "noauth" }
+        },
+        {
+          "name": "Get Interest",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/interests/{{interestId}}",
+            "description": "Returns one interest. Success example: {\"id\":\"...\",\"name\":\"Science\",\"description\":null}. Unknown IDs return 404."
+          },
+          "auth": { "type": "noauth" }
+        },
+        {
+          "name": "List My Interests",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profiles/me/interests",
+            "description": "Returns only the authenticated user's interests. Success example: [{\"id\":\"...\",\"name\":\"Science\",\"description\":null}]."
+          }
+        },
+        {
+          "name": "Add Interest to My Profile",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/profiles/me/interests/{{interestId}}",
+            "description": "Adds an existing interest to the authenticated user's profile. Success example: {\"id\":\"...\",\"name\":\"Science\",\"description\":null}. Duplicate association returns 409."
+          }
+        },
+        {
+          "name": "Remove Interest from My Profile",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/profiles/me/interests/{{interestId}}",
+            "description": "Removes an interest from the authenticated user's profile; success returns 204."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Learning Directions",
+      "description": "Public learning-direction catalog endpoints.",
+      "item": [
+        {
+          "name": "List Learning Directions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/learning-directions",
+            "description": "Returns LearningDirectionResponse objects ordered by name. Success example: [{\"id\":\"...\",\"name\":\"Backend Development\",\"description\":\"Build APIs\"}]."
+          },
+          "auth": { "type": "noauth" }
+        },
+        {
+          "name": "Get Learning Direction",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/learning-directions/{{learningDirectionId}}",
+            "description": "Returns a learning direction with its skills. Success example: {\"id\":\"...\",\"name\":\"Backend Development\",\"description\":\"Build APIs\",\"skills\":[]}. Unknown IDs return 404."
+          },
+          "auth": { "type": "noauth" }
+        }
+      ]
+    },
+    {
+      "name": "Experiences",
+      "description": "All experience operations are scoped to the authenticated local user.",
+      "item": [
+        {
+          "name": "List My Experiences",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profiles/me/experiences",
+            "description": "Returns the authenticated user's experiences. Success example: [{\"id\":\"...\",\"userId\":\"...\",\"title\":\"Building APIs\",\"description\":\"Details\"}]."
+          }
+        },
+        {
+          "name": "Create Experience",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Building APIs with ASP.NET Core\",\n  \"description\": \"Designed and implemented backend APIs.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/profiles/me/experiences",
+            "description": "Creates an experience for the authenticated user. Success example: {\"id\":\"...\",\"userId\":\"...\",\"title\":\"Building APIs with ASP.NET Core\",\"description\":\"Designed and implemented backend APIs.\"}. title is required."
+          }
+        },
+        {
+          "name": "Get My Experience",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
+            "description": "Returns the experience only if it belongs to the authenticated user. Success example: {\"id\":\"...\",\"userId\":\"...\",\"title\":\"Building APIs\",\"description\":\"Details\"}."
+          }
+        },
+        {
+          "name": "Update My Experience",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Building production APIs\",\n  \"description\": \"Updated description.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
+            "description": "Updates only an experience owned by the authenticated user. Success example: {\"id\":\"...\",\"userId\":\"...\",\"title\":\"Building production APIs\",\"description\":\"Updated description.\"}."
+          }
+        },
+        {
+          "name": "Delete My Experience",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/profiles/me/experiences/{{experienceId}}",
+            "description": "Deletes only an experience owned by the authenticated user. Success returns 204."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Progress",
+      "description": "Progress operations are scoped to the authenticated user. LearningDirectionId must reference an existing learning direction and each user can have one progress record per direction.",
+      "item": [
+        {
+          "name": "List My Progress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/me/progress",
+            "description": "Returns the authenticated user's progress records. Success example: [{\"id\":\"...\",\"learningDirectionId\":\"...\",\"learningDirectionName\":\"Backend Development\",\"level\":\"Beginner\",\"startedAt\":\"2026-09-19T00:00:00Z\",\"updatedAt\":\"2026-09-19T00:00:00Z\"}]."
+          }
+        },
+        {
+          "name": "Create Progress",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"learningDirectionId\": \"{{learningDirectionId}}\",\n  \"level\": \"Beginner\",\n  \"startedAt\": \"2026-09-19T00:00:00Z\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/me/progress",
+            "description": "Creates progress for the authenticated user. Duplicate user/direction progress returns a conflict from the service/controller."
+          }
+        },
+        {
+          "name": "Get My Progress",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/users/me/progress/{{progressId}}",
+            "description": "Returns a progress record only when it belongs to the authenticated user. Success example: {\"id\":\"...\",\"learningDirectionId\":\"...\",\"learningDirectionName\":\"Backend Development\",\"level\":\"Beginner\",\"startedAt\":\"2026-09-19T00:00:00Z\",\"updatedAt\":\"2026-09-19T00:00:00Z\"}."
+          }
+        },
+        {
+          "name": "Update My Progress",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"level\": \"Intermediate\",\n  \"startedAt\": \"2026-09-19T00:00:00Z\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/users/me/progress/{{progressId}}",
+            "description": "Updates only the authenticated user's progress record. Success example: {\"id\":\"...\",\"learningDirectionId\":\"...\",\"learningDirectionName\":\"Backend Development\",\"level\":\"Intermediate\",\"startedAt\":\"2026-09-19T00:00:00Z\",\"updatedAt\":\"2026-09-19T00:00:00Z\"}."
+          }
+        },
+        {
+          "name": "Delete My Progress",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/users/me/progress/{{progressId}}",
+            "description": "Deletes only the authenticated user's progress record. Success returns 204."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Points",
+      "description": "Protected Points API. Every request uses the authenticated local user derived from the Firebase Bearer token. Points packages are server-controlled: clients send only a package ID and required idempotency key. Simulated purchases use no real payment provider. CompleteMentoringSessionAsync exists only as a service method and is intentionally not included because no HTTP endpoint exposes it.",
+      "item": [
+        {
+          "name": "Get My Points Balance",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/points/me",
+            "description": "Returns PointsBalanceResponse. Example success: {\"points\":50}."
+          }
+        },
+        {
+          "name": "Get My Points Transactions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/points/me/transactions",
+            "description": "Returns only the authenticated user's ledger entries. Example item: {\"id\":\"...\",\"amount\":-15,\"transactionType\":\"MentoringPayment\",\"relatedUserId\":\"...\",\"mentoringSessionId\":\"...\",\"reason\":\"Learned React from mentor\",\"createdAt\":\"2026-09-19T00:00:00Z\"}."
+          }
+        },
+        {
+          "name": "Get Points Packages",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/points/packages",
+            "description": "Returns the backend-defined packages. Current values: starter = 100 Points for 5 USD; standard = 250 Points for 10 USD; premium = 500 Points for 18 USD. Currency is USD."
+          }
+        },
+        {
+          "name": "Purchase Starter Package - First Request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packageId\": \"starter\",\n  \"idempotencyKey\": \"{{idempotencyKey}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/points/purchases",
+            "description": "Successful simulated purchase. The backend resolves starter to 100 Points and 5 USD, credits the authenticated user, and creates one purchase plus one Purchase transaction. Do not send UserId, Points, Price, or Balance."
+          }
+        },
+        {
+          "name": "Purchase Starter Package - Repeat Same Key",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packageId\": \"starter\",\n  \"idempotencyKey\": \"{{idempotencyKey}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/points/purchases",
+            "description": "Retry the previous request with the same authenticated user and idempotency key. The existing purchase is returned and the user is not credited twice."
+          }
+        },
+        {
+          "name": "Purchase Starter Package - New Key",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packageId\": \"starter\",\n  \"idempotencyKey\": \"{{secondIdempotencyKey}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/points/purchases",
+            "description": "A different idempotency key represents a new intentional purchase and credits another 100 Points. The package price and points remain backend-controlled."
+          }
+        },
+        {
+          "name": "Get My Purchase History",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/points/me/purchases",
+            "description": "Returns only the authenticated user's simulated purchase records. Example: {\"packageId\":\"starter\",\"points\":100,\"price\":5,\"currency\":\"USD\",\"paymentMethod\":\"Simulated\",\"status\":\"Completed\",\"balance\":150}."
+          }
+        }
+      ]
+    }
+  ]
+}
