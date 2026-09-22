@@ -1,3 +1,4 @@
+using Team3.Backend.Features.AI.Interfaces;
 using Team3.Backend.Features.Interests.Dtos;
 using Team3.Backend.Features.Interests.Interfaces;
 using Team3.Backend.Models;
@@ -7,10 +8,14 @@ namespace Team3.Backend.Features.Interests;
 public class InterestsService : IInterestsService
 {
     private readonly IInterestsRepository _interestsRepository;
+    private readonly IProfileSyncService? _profileSyncService;
 
-    public InterestsService(IInterestsRepository interestsRepository)
+    public InterestsService(
+        IInterestsRepository interestsRepository,
+        IProfileSyncService? profileSyncService = null)
     {
         _interestsRepository = interestsRepository;
+        _profileSyncService = profileSyncService;
     }
 
     public async Task<IReadOnlyList<InterestResponse>> GetAllAsync()
@@ -64,6 +69,7 @@ public class InterestsService : IInterestsService
         });
 
         await _interestsRepository.SaveChangesAsync();
+        await SyncProfileAsync(userId);
         return MapToResponse(interest);
     }
 
@@ -83,6 +89,7 @@ public class InterestsService : IInterestsService
         }
 
         await _interestsRepository.SaveChangesAsync();
+        await SyncProfileAsync(userId);
         return true;
     }
 
@@ -102,5 +109,13 @@ public class InterestsService : IInterestsService
             Name = interest.Name,
             Description = interest.Description
         };
+    }
+
+    private async Task SyncProfileAsync(Guid userId)
+    {
+        if (_profileSyncService is not null)
+        {
+            await _profileSyncService.UpsertProfileAsync(userId);
+        }
     }
 }

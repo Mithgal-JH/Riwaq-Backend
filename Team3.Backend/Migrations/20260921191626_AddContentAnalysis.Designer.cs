@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Team3.Backend.Data;
@@ -11,9 +12,11 @@ using Team3.Backend.Data;
 namespace Team3.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260921191626_AddContentAnalysis")]
+    partial class AddContentAnalysis
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,10 +208,9 @@ namespace Team3.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserBId");
+                    b.HasIndex("UserAId");
 
-                    b.HasIndex("UserAId", "UserBId")
-                        .IsUnique();
+                    b.HasIndex("UserBId");
 
                     b.ToTable("Connections", t =>
                         {
