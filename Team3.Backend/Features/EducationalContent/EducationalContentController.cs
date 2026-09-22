@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Team3.Backend.Features.EducationalContent.Dtos;
+using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.EducationalContent.Interfaces;
 
 namespace Team3.Backend.Features.EducationalContent;
@@ -11,19 +12,22 @@ public class EducationalContentController : ControllerBase
     // Educational Content service.
     private readonly IEducationalContentService _educationalContentService;
 
+    private readonly ICurrentUserService _currentUserService;
+
     // Educational Content interactions service.
     private readonly IEducationalContentInteractionsService
         _educationalContentInteractionsService;
 
     public EducationalContentController(
-        IEducationalContentService educationalContentService,
-        IEducationalContentInteractionsService educationalContentInteractionsService)
+       IEducationalContentService educationalContentService,
+       IEducationalContentInteractionsService educationalContentInteractionsService,
+       ICurrentUserService currentUserService)
     {
         _educationalContentService = educationalContentService;
         _educationalContentInteractionsService =
             educationalContentInteractionsService;
+        _currentUserService = currentUserService;
     }
-
     // Get all educational content.
     /// <summary>
     /// Returns all educational content.
@@ -73,13 +77,13 @@ public class EducationalContentController : ControllerBase
     public async Task<ActionResult<EducationalContentResponse>> Create(
         [FromBody] CreateEducationalContentRequest request)
     {
-        var firebaseUid = GetFirebaseUidFromRequest();
+        var firebaseUid = _currentUserService.FirebaseUid;
 
-        if (firebaseUid is null)
+        if (string.IsNullOrWhiteSpace(firebaseUid))
         {
-            return BadRequest(new
+            return Unauthorized(new
             {
-                message = "X-Firebase-Uid header is required."
+                message = "Authenticated Firebase user is required."
             });
         }
 
@@ -423,7 +427,7 @@ public class EducationalContentController : ControllerBase
             return NotFound(new { message = exception.Message });
         }
     }
-        // Record a share event for educational content.
+    // Record a share event for educational content.
     /// <summary>
     /// Records a share event for educational content.
     /// </summary>
