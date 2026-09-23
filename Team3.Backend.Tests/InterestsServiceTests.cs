@@ -1,21 +1,26 @@
 using FluentAssertions;
 using Moq;
 using Team3.Backend.Features.Interests;
+using Team3.Backend.Features.Interests.Dtos;
 using Team3.Backend.Features.Interests.Interfaces;
 using Team3.Backend.Models;
+using Team3.Backend.Services.Caching;
 
 namespace Team3.Backend.Tests;
 
 public class InterestsServiceTests
 {
     private readonly Mock<IInterestsRepository> _repository = new();
+    private readonly Mock<ICacheService> _cacheService = new();
     private readonly InterestsService _service;
     private readonly Guid _userId = Guid.NewGuid();
     private readonly Guid _interestId = Guid.NewGuid();
 
     public InterestsServiceTests()
     {
-        _service = new InterestsService(_repository.Object);
+        _service = new InterestsService(
+            _repository.Object,
+            _cacheService.Object);
     }
 
     [Fact]
@@ -120,5 +125,28 @@ public class InterestsServiceTests
 
         result.Select(interest => interest.Name)
             .Should().Equal("Art", "Zoology");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldUseCache_WhenAvailable()
+    {
+        var cachedInterests = new List<InterestResponse>
+        {
+            new() { Id = Guid.NewGuid(), Name = "Biology" }
+        };
+        var cacheService = new Mock<ICacheService>();
+        cacheService
+            .Setup(x => x.GetAsync<List<InterestResponse>>("interests:all"))
+            .ReturnsAsync(cachedInterests);
+
+        var service = new InterestsService(
+            _repository.Object,
+            cacheService: cacheService.Object);
+
+        var result = await service.GetAllAsync();
+
+        result.Should().BeEquivalentTo(cachedInterests);
+        cacheService.Verify(x => x.GetAsync<List<InterestResponse>>("interests:all"), Times.Once);
+        _repository.Verify(x => x.GetAllAsync(), Times.Never);
     }
 }

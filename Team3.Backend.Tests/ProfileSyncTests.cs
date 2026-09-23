@@ -13,6 +13,7 @@ using Team3.Backend.Features.Interests.Interfaces;
 using Team3.Backend.Features.Skills;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Features.Users;
+using Team3.Backend.Services.Caching;
 using Team3.Backend.Features.Users.Dtos;
 using Team3.Backend.Features.Users.Interfaces;
 using Team3.Backend.Models;
@@ -244,7 +245,11 @@ public sealed class ProfileSyncTests
                 It.IsAny<CancellationToken>()))
             .Callback(() => events.Add("ai"))
             .Returns(Task.CompletedTask);
-        var service = new SkillsService(repository.Object, sync.Object);
+        var cacheService = new Mock<ICacheService>();
+        var service = new SkillsService(
+            repository.Object,
+            cacheService.Object,
+            sync.Object);
 
         await service.AddMySkillAsync(userId, skillId);
 
@@ -273,7 +278,11 @@ public sealed class ProfileSyncTests
                 It.IsAny<CancellationToken>()))
             .Callback(() => events.Add("ai"))
             .Returns(Task.CompletedTask);
-        var service = new InterestsService(repository.Object, sync.Object);
+        var cacheService = new Mock<ICacheService>();
+        var service = new InterestsService(
+            repository.Object,
+            cacheService.Object,
+            sync.Object);
 
         await service.AddMyInterestAsync(userId, interestId);
 

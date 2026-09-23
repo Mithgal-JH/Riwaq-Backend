@@ -100,8 +100,18 @@ builder.Services
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSignalR();
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration =
+        builder.Configuration.GetConnectionString("Redis")
+        ?? Environment.GetEnvironmentVariable("REDIS_CONNECTION")
+        ?? "localhost:6379";
+
+    options.InstanceName = "Riwaq:";
+});
+
+builder.Services.AddSignalR();
 // Register application services and Identity.
 builder.Services.AddApplicationServices();
 

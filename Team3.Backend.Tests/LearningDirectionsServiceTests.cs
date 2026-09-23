@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using Team3.Backend.Services.Caching;
 using Team3.Backend.Features.LearningDirections;
 using Team3.Backend.Features.LearningDirections.Interfaces;
 using Team3.Backend.Models;
@@ -17,8 +18,10 @@ public class LearningDirectionsServiceTests
         var repository = new Mock<ILearningDirectionsRepository>();
         repository.Setup(x => x.GetAllAsync())
             .ReturnsAsync([first, second]);
-
-        var service = new LearningDirectionsService(repository.Object);
+        var cacheService = new Mock<ICacheService>();
+        var service = new LearningDirectionsService(
+            repository.Object,
+            cacheService.Object);
         var result = await service.GetAllAsync();
 
         result.Should().HaveCount(2);
@@ -43,8 +46,11 @@ public class LearningDirectionsServiceTests
         var repository = new Mock<ILearningDirectionsRepository>();
         repository.Setup(x => x.GetByIdWithSkillsAsync(direction.Id))
             .ReturnsAsync(direction);
+        var cacheService = new Mock<ICacheService>();
 
-        var service = new LearningDirectionsService(repository.Object);
+        var service = new LearningDirectionsService(
+            repository.Object,
+            cacheService.Object);
         var result = await service.GetByIdAsync(direction.Id);
 
         result.Should().NotBeNull();
@@ -59,9 +65,10 @@ public class LearningDirectionsServiceTests
         var directionId = Guid.NewGuid();
         repository.Setup(x => x.GetByIdWithSkillsAsync(directionId))
             .ReturnsAsync((LearningDirection?)null);
-
-        var service = new LearningDirectionsService(repository.Object);
-
+        var cacheService = new Mock<ICacheService>();
+        var service = new LearningDirectionsService(
+            repository.Object,
+            cacheService.Object);
         (await service.GetByIdAsync(directionId)).Should().BeNull();
     }
 }
