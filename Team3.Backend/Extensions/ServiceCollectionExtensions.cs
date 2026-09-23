@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using Team3.Backend.Data;
+using Team3.Backend.Services.Caching;
 using Team3.Backend.Features.Authentication;
 using Team3.Backend.Features.Authentication.Interfaces;
 using Team3.Backend.Features.ConnectionRequests;
@@ -89,7 +90,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ILearningDirectionsRepository, LearningDirectionsRepository>();
 
         services.AddScoped<ILearningDirectionsService, LearningDirectionsService>();
-
+        services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<ILearningSessionsRepository, LearningSessionsRepository>();
         services.AddScoped<ILearningSessionsService, LearningSessionsService>();
 

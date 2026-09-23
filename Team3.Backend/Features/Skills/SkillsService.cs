@@ -2,6 +2,7 @@ using Team3.Backend.Features.AI.Interfaces;
 using Team3.Backend.Features.Skills.Dtos;
 using Team3.Backend.Features.Skills.Interfaces;
 using Team3.Backend.Models;
+using Team3.Backend.Services.Caching;
 
 namespace Team3.Backend.Features.Skills;
 
@@ -9,25 +10,60 @@ public class SkillsService : ISkillsService
 {
     private readonly ISkillsRepository _skillsRepository;
     private readonly IProfileSyncService? _profileSyncService;
+    private readonly ICacheService _cacheService;
 
     public SkillsService(
         ISkillsRepository skillsRepository,
+        ICacheService cacheService,
         IProfileSyncService? profileSyncService = null)
     {
         _skillsRepository = skillsRepository;
         _profileSyncService = profileSyncService;
+        _cacheService = cacheService;
     }
 
     public async Task<IReadOnlyList<SkillResponse>> GetAllAsync()
     {
+        const string cacheKey = "skills:all";
+
+        var cached = await _cacheService.GetAsync<List<SkillResponse>>(cacheKey);
+
+        if (cached is not null)
+            return cached;
+
         var skills = await _skillsRepository.GetAllAsync();
-        return skills.Select(MapToResponse).ToList();
+        var result = skills.Select(MapToResponse).ToList();
+
+        await _cacheService.SetAsync(
+            cacheKey,
+            result,
+            TimeSpan.FromMinutes(30));
+
+        return result;
     }
 
     public async Task<SkillResponse?> GetByIdAsync(Guid skillId)
     {
+        var cacheKey = $"skill:{skillId}";
+
+        var cached = await _cacheService.GetAsync<SkillResponse>(cacheKey);
+
+        if (cached is not null)
+            return cached;
+
         var skill = await _skillsRepository.GetByIdAsync(skillId);
-        return skill is null ? null : MapToResponse(skill);
+
+        if (skill is null)
+            return null;
+
+        var result = MapToResponse(skill);
+
+        await _cacheService.SetAsync(
+            cacheKey,
+            result,
+            TimeSpan.FromMinutes(30));
+
+        return result;
     }
 
     public async Task<IReadOnlyList<SkillResponse>> GetMySkillsAsync(

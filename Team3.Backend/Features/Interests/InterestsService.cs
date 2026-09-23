@@ -2,6 +2,7 @@ using Team3.Backend.Features.AI.Interfaces;
 using Team3.Backend.Features.Interests.Dtos;
 using Team3.Backend.Features.Interests.Interfaces;
 using Team3.Backend.Models;
+using Team3.Backend.Services.Caching;
 
 namespace Team3.Backend.Features.Interests;
 
@@ -9,25 +10,60 @@ public class InterestsService : IInterestsService
 {
     private readonly IInterestsRepository _interestsRepository;
     private readonly IProfileSyncService? _profileSyncService;
+    private readonly ICacheService _cacheService;
 
     public InterestsService(
         IInterestsRepository interestsRepository,
+        ICacheService cacheService,
         IProfileSyncService? profileSyncService = null)
     {
         _interestsRepository = interestsRepository;
         _profileSyncService = profileSyncService;
+        _cacheService = cacheService;
     }
 
     public async Task<IReadOnlyList<InterestResponse>> GetAllAsync()
     {
+        const string cacheKey = "interests:all";
+
+        var cached = await _cacheService.GetAsync<List<InterestResponse>>(cacheKey);
+
+        if (cached is not null)
+            return cached;
+
         var interests = await _interestsRepository.GetAllAsync();
-        return interests.Select(MapToResponse).ToList();
+        var result = interests.Select(MapToResponse).ToList();
+
+        await _cacheService.SetAsync(
+            cacheKey,
+            result,
+            TimeSpan.FromMinutes(30));
+
+        return result;
     }
 
     public async Task<InterestResponse?> GetByIdAsync(Guid interestId)
     {
+        var cacheKey = $"interest:{interestId}";
+
+        var cached = await _cacheService.GetAsync<InterestResponse>(cacheKey);
+
+        if (cached is not null)
+            return cached;
+
         var interest = await _interestsRepository.GetByIdAsync(interestId);
-        return interest is null ? null : MapToResponse(interest);
+
+        if (interest is null)
+            return null;
+
+        var result = MapToResponse(interest);
+
+        await _cacheService.SetAsync(
+            cacheKey,
+            result,
+            TimeSpan.FromMinutes(30));
+
+        return result;
     }
 
     public async Task<IReadOnlyList<InterestResponse>> GetMyInterestsAsync(
