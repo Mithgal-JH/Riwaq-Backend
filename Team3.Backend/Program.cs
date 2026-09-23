@@ -103,10 +103,13 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
+    var redisHost = builder.Configuration["REDIS_HOST"];
+    var redisPort = builder.Configuration["REDIS_PORT"];
+    var redisUser = builder.Configuration["REDIS_USER"];
+    var redisPassword = builder.Configuration["REDIS_PASSWORD"];
+
     options.Configuration =
-        builder.Configuration.GetConnectionString("Redis")
-        ?? Environment.GetEnvironmentVariable("REDIS_CONNECTION")
-        ?? "localhost:6379";
+        $"{redisHost}:{redisPort},user={redisUser},password={redisPassword}";
 
     options.InstanceName = "Riwaq:";
 });
