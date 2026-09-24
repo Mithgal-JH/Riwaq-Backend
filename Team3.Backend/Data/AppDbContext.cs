@@ -476,6 +476,68 @@ public class AppDbContext
 
             entity.HasIndex(x => x.Name)
                 .IsUnique();
+
+            entity.HasData(
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000001"),
+                    Name = "Programming and Web"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000002"),
+                    Name = "Artificial Intelligence and Data"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000003"),
+                    Name = "Electronics and Embedded Systems"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000004"),
+                    Name = "Robotics"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000005"),
+                    Name = "Cybersecurity"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000006"),
+                    Name = "Design"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000007"),
+                    Name = "Mathematics"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000008"),
+                    Name = "Natural Sciences"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000009"),
+                    Name = "Health and Medicine"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000010"),
+                    Name = "Business and Economics"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000011"),
+                    Name = "Languages and Communication"
+                },
+                new Skill
+                {
+                    Id = new Guid("10000000-0000-0000-0000-000000000012"),
+                    Name = "Humanities and Social Sciences"
+                });
         });
 
         modelBuilder.Entity<Experience>(entity =>
