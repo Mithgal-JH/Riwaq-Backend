@@ -22,7 +22,7 @@ public sealed class ContentAnalysisClient : AiHttpClient, IContentAnalysisClient
         request.RequestId = EnsureRequestId(request.RequestId);
 
         return PostAsync<ContentAnalysisRequest, ContentAnalysisResponse>(
-            "/api/v1/ai/content-analysis",
+            "/api/v1/ai/content/analyze",
             request,
             request.RequestId,
             cancellationToken);
