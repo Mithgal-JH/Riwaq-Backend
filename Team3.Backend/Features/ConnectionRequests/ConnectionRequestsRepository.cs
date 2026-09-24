@@ -107,7 +107,11 @@ public class ConnectionRequestsRepository : IConnectionRequestsRepository
         // Add the new connection to the database context.
         _context.Connections.Add(connection);
     }
-
+    public void AddConversation(Conversation conversation)
+    {
+        // Add the new conversation to the database context.
+        _context.Conversations.Add(conversation);
+    }
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
