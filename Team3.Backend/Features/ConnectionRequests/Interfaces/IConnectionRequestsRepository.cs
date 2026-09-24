@@ -28,6 +28,7 @@ public interface IConnectionRequestsRepository
 
     // Add a new connection after a request is accepted.
     void AddConnection(Connection connection);
-
+// Add a conversation for an accepted connection.
+void AddConversation(Conversation conversation);
     Task SaveChangesAsync();
 }

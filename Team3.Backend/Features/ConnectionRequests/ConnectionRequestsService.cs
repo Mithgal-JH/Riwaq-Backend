@@ -105,7 +105,7 @@ public class ConnectionRequestsService : IConnectionRequestsService
         var requests = await _repository.GetReceivedAsync(user.Id);
 
         return requests
-            .Select(MapToResponse)
+            .Select(request => MapToResponse(request))
             .ToList();
     }
 
@@ -118,8 +118,8 @@ public class ConnectionRequestsService : IConnectionRequestsService
         var requests = await _repository.GetSentAsync(user.Id);
 
         return requests
-            .Select(MapToResponse)
-            .ToList();
+    .Select(request => MapToResponse(request))
+    .ToList();
     }
 
     public async Task<ConnectionRequestResponse> UpdateStatusAsync(
@@ -150,7 +150,7 @@ public class ConnectionRequestsService : IConnectionRequestsService
             ?? throw new KeyNotFoundException("Connection request not found.");
 
         var requestedStatus = NormalizeStatus(request.Status);
-
+        Guid? conversationId = null;
         if (connectionRequest.SenderUserId == currentUser.Id)
         {
             // The sender can only cancel a pending request.
@@ -215,6 +215,22 @@ public class ConnectionRequestsService : IConnectionRequestsService
 
                     // Create the connection when the request is accepted.
                     _repository.AddConnection(connection);
+
+                    var now = DateTime.UtcNow;
+
+                    var conversation = new Conversation
+                    {
+                        Id = Guid.NewGuid(),
+                        ConnectionId = connection.Id,
+                        CreatedAt = now,
+                        LastActivityAt = now,
+                        Connection = connection
+                    };
+
+                    // Create the conversation automatically for the new connection.
+                    _repository.AddConversation(conversation);
+
+                    conversationId = conversation.Id;
                 }
             }
         }
@@ -246,7 +262,7 @@ public class ConnectionRequestsService : IConnectionRequestsService
                 connectionRequest.Id);
         }
 
-        return MapToResponse(connectionRequest);
+        return MapToResponse(connectionRequest, conversationId);
     }
 
     private static string NormalizeStatus(string status)
@@ -291,19 +307,16 @@ public class ConnectionRequestsService : IConnectionRequestsService
     }
 
     private static ConnectionRequestResponse MapToResponse(
-        ConnectionRequest connectionRequest)
+      ConnectionRequest connectionRequest,
+      Guid? conversationId = null)
     {
         return new ConnectionRequestResponse
         {
             Id = connectionRequest.Id,
-
-            // Map the sender user information.
             Sender = MapUserProfile(connectionRequest.SenderUser),
-
-            // Map the receiver user information.
             Receiver = MapUserProfile(connectionRequest.ReceiverUser),
-
             Status = connectionRequest.Status,
+            ConversationId = conversationId,
             CreatedAt = connectionRequest.CreatedAt,
             UpdatedAt = connectionRequest.UpdatedAt
         };

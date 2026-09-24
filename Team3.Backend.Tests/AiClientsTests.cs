@@ -45,8 +45,8 @@ public sealed class AiClientsTests
 
         response.ProcessingStatus.Should().Be("completed");
         handler.Requests.Should().ContainSingle();
-        handler.Requests[0].Path.Should().Be("/api/v1/ai/content-analysis");
-        handler.Requests[0].Body.Should().Contain("\"request_id\":\"req_");
+        handler.Requests[0].Path.Should().Be("/api/v1/ai/content/analyze");
+         handler.Requests[0].Body.Should().Contain("\"request_id\":\"req_");
         handler.Requests[0].Body.Should().Contain("\"content_id\":\"post_789\"");
     }
 
