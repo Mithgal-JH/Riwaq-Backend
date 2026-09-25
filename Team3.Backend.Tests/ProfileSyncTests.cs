@@ -438,6 +438,7 @@ public sealed class ProfileSyncTests
             Profiles = [new ProfileSyncItem
             {
                 ProfileId = "profile-1",
+                UserId = "user-1",
                 Skills = ["Python"],
                 Interests = ["AI"],
                 LearningDirection = "Backend",
@@ -451,8 +452,14 @@ public sealed class ProfileSyncTests
         using var document = JsonDocument.Parse(handler.Requests[0].Body);
         document.RootElement.GetProperty("sync_type").GetString()
             .Should().Be("upsert");
-        document.RootElement.GetProperty("profiles")[0]
-            .GetProperty("profile_id").GetString().Should().Be("profile-1");
+        var profile = document.RootElement.GetProperty("profiles")[0];
+        profile.GetProperty("profile_id").GetString().Should().Be("profile-1");
+        profile.GetProperty("user_id").GetString().Should().Be("user-1");
+        profile.GetProperty("skills")[0].GetString().Should().Be("Python");
+        profile.GetProperty("interests")[0].GetString().Should().Be("AI");
+        profile.GetProperty("learning_direction").GetString().Should().Be("Backend");
+        profile.GetProperty("bio").GetString().Should().Be("Bio");
+        document.RootElement.TryGetProperty("profileIds", out _).Should().BeFalse();
     }
 
     [Fact]
