@@ -157,6 +157,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IContentAnalysisRepository, ContentAnalysisRepository>();
         services.AddScoped<IContentAnalysisService, ContentAnalysisService>();
         services.AddScoped<IProfileSyncService, ProfileSyncService>();
+        services.AddHostedService<ProfileSyncBackgroundService>();
         services.AddScoped<IPersonRecommendationService, PersonRecommendationService>();
         services.AddScoped<IPostRecommendationRepository, PostRecommendationRepository>();
         services.AddScoped<IPostRecommendationService, PostRecommendationService>();

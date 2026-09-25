@@ -40,6 +40,7 @@ public sealed class ProfileSyncService : IProfileSyncService
             Profiles = [new ProfileSyncItem
             {
                 ProfileId = user.Id.ToString(),
+                UserId = user.Id.ToString(),
                 Skills = user.UserSkills
                     .Select(userSkill => userSkill.Skill.Name)
                     .OrderBy(name => name)
@@ -54,6 +55,45 @@ public sealed class ProfileSyncService : IProfileSyncService
         };
 
         await TrySyncAsync(request, userId, cancellationToken);
+    }
+
+    public async Task FullSyncAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var users = await _usersRepository.GetAllForAiSyncAsync();
+        var profiles = users
+            .Select(user => new ProfileSyncItem
+            {
+                ProfileId = user.Id.ToString(),
+                UserId = user.Id.ToString(),
+                Skills = user.UserSkills
+                    .Select(userSkill => userSkill.Skill.Name)
+                    .OrderBy(name => name)
+                    .ToList(),
+                Interests = user.UserInterests
+                    .Select(userInterest => userInterest.Interest.Name)
+                    .OrderBy(name => name)
+                    .ToList(),
+                LearningDirection = user.SelectedSkill?.Name,
+                Bio = user.Profile?.Bio
+            })
+            .ToList();
+
+        _logger.LogInformation(
+            "Starting full profile synchronization for {ProfileCount} profiles.",
+            profiles.Count);
+
+        var request = new ProfileSyncRequest
+        {
+            SyncType = "full",
+            Profiles = profiles
+        };
+
+        await TrySyncAsync(request, Guid.Empty, cancellationToken);
+
+        _logger.LogInformation(
+            "Completed full profile synchronization for {ProfileCount} profiles.",
+            profiles.Count);
     }
 
     public async Task DeleteProfileAsync(
