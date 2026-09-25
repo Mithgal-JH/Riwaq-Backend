@@ -75,7 +75,7 @@ public sealed class ProfileSyncTests
     }
 
     [Fact]
-    public async Task ProfileSyncService_ShouldSendEmptyCollectionsAndNullOptionalValues()
+    public async Task ProfileSyncService_ShouldSendEmptyCollectionsAndEmptyBio()
     {
         var userId = Guid.NewGuid();
         var repository = new Mock<IUsersRepository>();
@@ -98,7 +98,7 @@ public sealed class ProfileSyncTests
                 request.Profiles![0].Skills.Count == 0
                 && request.Profiles[0].Interests.Count == 0
                 && request.Profiles[0].LearningDirection == null
-                && request.Profiles[0].Bio == null),
+                && request.Profiles[0].Bio == string.Empty),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -153,7 +153,7 @@ public sealed class ProfileSyncTests
         });
 
         var secondUser = ServiceTestData.User(secondUserId);
-        secondUser.Profile = new Profile { UserId = secondUserId, Bio = "Ship fast." };
+        secondUser.Profile = new Profile { UserId = secondUserId };
         secondUser.SelectedSkill = new Skill { Id = Guid.NewGuid(), Name = "Product Strategy" };
         secondUser.UserSkills.Add(new UserSkill
         {
@@ -199,7 +199,7 @@ public sealed class ProfileSyncTests
                     && p.Skills.SequenceEqual(new[] { "Leadership" })
                     && p.Interests.SequenceEqual(new[] { "Startups" })
                     && p.LearningDirection == "Product Strategy"
-                    && p.Bio == "Ship fast.")),
+                    && p.Bio == string.Empty)),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 

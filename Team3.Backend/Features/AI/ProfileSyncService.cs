@@ -50,7 +50,7 @@ public sealed class ProfileSyncService : IProfileSyncService
                     .OrderBy(name => name)
                     .ToList(),
                 LearningDirection = user.SelectedSkill?.Name,
-                Bio = user.Profile?.Bio
+                Bio = user.Profile?.Bio ?? string.Empty
             }]
         };
 
@@ -75,7 +75,7 @@ public sealed class ProfileSyncService : IProfileSyncService
                     .OrderBy(name => name)
                     .ToList(),
                 LearningDirection = user.SelectedSkill?.Name,
-                Bio = user.Profile?.Bio
+                Bio = user.Profile?.Bio ?? string.Empty
             })
             .ToList();
 
