@@ -8,6 +8,8 @@ public interface IUsersRepository
 
     Task<User?> GetByIdForAiSyncAsync(Guid id);
 
+    Task<List<User>> GetAllForAiSyncAsync();
+
     Task<List<User>> GetPublicProfilesByIdsAsync(
         IReadOnlyCollection<Guid> userIds);
 

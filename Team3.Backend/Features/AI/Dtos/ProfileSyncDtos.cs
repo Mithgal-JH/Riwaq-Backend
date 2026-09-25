@@ -17,6 +17,8 @@ public sealed class ProfileSyncItem
 {
     public string ProfileId { get; set; } = string.Empty;
 
+    public string UserId { get; set; } = string.Empty;
+
     public List<string> Skills { get; set; } = [];
 
     public List<string> Interests { get; set; } = [];

@@ -6,6 +6,9 @@ public interface IProfileSyncService
         Guid userId,
         CancellationToken cancellationToken = default);
 
+    Task FullSyncAsync(
+        CancellationToken cancellationToken = default);
+
     Task DeleteProfileAsync(
         Guid userId,
         CancellationToken cancellationToken = default);

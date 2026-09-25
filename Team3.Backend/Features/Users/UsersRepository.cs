@@ -36,6 +36,21 @@ public class UsersRepository : IUsersRepository
             .FirstOrDefaultAsync(user => user.Id == id);
     }
 
+    public async Task<List<User>> GetAllForAiSyncAsync()
+    {
+        return await _context.Users
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(user => user.Profile)
+            .Include(user => user.SelectedSkill)
+            .Include(user => user.UserSkills)
+                .ThenInclude(userSkill => userSkill.Skill)
+            .Include(user => user.UserInterests)
+                .ThenInclude(userInterest => userInterest.Interest)
+            .OrderBy(user => user.Id)
+            .ToListAsync();
+    }
+
     public async Task<List<User>> GetPublicProfilesByIdsAsync(
         IReadOnlyCollection<Guid> userIds)
     {

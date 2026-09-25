@@ -129,6 +129,130 @@ public sealed class ProfileSyncTests
     }
 
     [Fact]
+    public async Task ProfileSyncService_ShouldSendFullSyncPayload()
+    {
+        var firstUserId = Guid.NewGuid();
+        var secondUserId = Guid.NewGuid();
+        var firstUser = ServiceTestData.User(firstUserId);
+        firstUser.Profile = new Profile { UserId = firstUserId, Bio = "Build useful systems." };
+        firstUser.SelectedSkill = new Skill { Id = Guid.NewGuid(), Name = "AI & Machine Learning" };
+        firstUser.UserSkills.Add(new UserSkill
+        {
+            UserId = firstUserId,
+            Skill = new Skill { Name = "Python" }
+        });
+        firstUser.UserSkills.Add(new UserSkill
+        {
+            UserId = firstUserId,
+            Skill = new Skill { Name = "SQL" }
+        });
+        firstUser.UserInterests.Add(new UserInterest
+        {
+            UserId = firstUserId,
+            Interest = new Interest { Name = "Machine Learning" }
+        });
+
+        var secondUser = ServiceTestData.User(secondUserId);
+        secondUser.Profile = new Profile { UserId = secondUserId, Bio = "Ship fast." };
+        secondUser.SelectedSkill = new Skill { Id = Guid.NewGuid(), Name = "Product Strategy" };
+        secondUser.UserSkills.Add(new UserSkill
+        {
+            UserId = secondUserId,
+            Skill = new Skill { Name = "Leadership" }
+        });
+        secondUser.UserInterests.Add(new UserInterest
+        {
+            UserId = secondUserId,
+            Interest = new Interest { Name = "Startups" }
+        });
+
+        var repository = new Mock<IUsersRepository>();
+        var client = new Mock<IProfileSyncClient>();
+        repository.Setup(item => item.GetAllForAiSyncAsync())
+            .ReturnsAsync([firstUser, secondUser]);
+        client.Setup(item => item.SyncAsync(
+                It.IsAny<ProfileSyncRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProfileSyncResponse());
+
+        var service = new ProfileSyncService(
+            repository.Object,
+            client.Object,
+            NullLogger<ProfileSyncService>.Instance);
+
+        await service.FullSyncAsync();
+
+        client.Verify(item => item.SyncAsync(
+            It.Is<ProfileSyncRequest>(request =>
+                request.SyncType == "full"
+                && request.Profiles!.Count == 2
+                && request.Profiles.Any(p =>
+                    p.ProfileId == firstUserId.ToString()
+                    && p.UserId == firstUserId.ToString()
+                    && p.Skills.SequenceEqual(new[] { "Python", "SQL" })
+                    && p.Interests.SequenceEqual(new[] { "Machine Learning" })
+                    && p.LearningDirection == "AI & Machine Learning"
+                    && p.Bio == "Build useful systems.")
+                && request.Profiles.Any(p =>
+                    p.ProfileId == secondUserId.ToString()
+                    && p.UserId == secondUserId.ToString()
+                    && p.Skills.SequenceEqual(new[] { "Leadership" })
+                    && p.Interests.SequenceEqual(new[] { "Startups" })
+                    && p.LearningDirection == "Product Strategy"
+                    && p.Bio == "Ship fast.")),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ProfileSyncService_ShouldSendEmptyFullSyncPayloadSafely()
+    {
+        var repository = new Mock<IUsersRepository>();
+        var client = new Mock<IProfileSyncClient>();
+        repository.Setup(item => item.GetAllForAiSyncAsync())
+            .ReturnsAsync([]);
+        client.Setup(item => item.SyncAsync(
+                It.IsAny<ProfileSyncRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProfileSyncResponse());
+
+        var service = new ProfileSyncService(
+            repository.Object,
+            client.Object,
+            NullLogger<ProfileSyncService>.Instance);
+
+        await service.FullSyncAsync();
+
+        client.Verify(item => item.SyncAsync(
+            It.Is<ProfileSyncRequest>(request =>
+                request.SyncType == "full"
+                && request.Profiles != null
+                && request.Profiles.Count == 0),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ProfileSyncService_ShouldSwallowAiFailureDuringFullSync()
+    {
+        var repository = new Mock<IUsersRepository>();
+        var client = new Mock<IProfileSyncClient>();
+        repository.Setup(item => item.GetAllForAiSyncAsync())
+            .ReturnsAsync([ServiceTestData.User(Guid.NewGuid())]);
+        client.Setup(item => item.SyncAsync(
+                It.IsAny<ProfileSyncRequest>(),
+                It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new AiServiceException("failed", "operation"));
+
+        var service = new ProfileSyncService(
+            repository.Object,
+            client.Object,
+            NullLogger<ProfileSyncService>.Instance);
+
+        var action = () => service.FullSyncAsync();
+
+        await action.Should().NotThrowAsync();
+    }
+
+    [Fact]
     public async Task ProfileSyncService_ShouldNotLoadEachSkillOrInterestSeparately()
     {
         var userId = Guid.NewGuid();
